@@ -310,6 +310,75 @@ button,input{font:inherit;color:inherit}
 
 </style>
 
+<style>
+/* スクショ読み込み：ボタンと、下から出るシート（両方の計算機で共通） */
+.card-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card-acts .scanbtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:5px 10px;font:inherit;font-size:12.5px;font-weight:700;line-height:1.5;cursor:pointer}
+.card-acts .scanbtn svg,.sc-btn svg{width:16px;height:16px;flex:none}
+.scanhint{margin:-6px 0 0;font-size:12.5px;color:var(--muted)}
+.sc{border:0;padding:0;margin:auto auto 0;width:100%;max-width:560px;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow:auto;overscroll-behavior:contain;background:var(--surface);color:var(--ink);border-radius:16px 16px 0 0;font-family:var(--font-ui);font-size:14.5px;line-height:1.6;box-shadow:0 -10px 40px rgba(0,0,0,.28)}
+@media (min-width:640px){.sc{margin:auto;border-radius:14px;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}}
+.sc::backdrop{background:rgba(8,16,28,.55)}
+.sc-in{display:grid;gap:12px;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sc-in>*{margin:0}
+.sc-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sc-h h2{margin:0;font-size:17px;font-weight:700}
+.sc-x{border:0;background:var(--surface-2);color:var(--muted);width:32px;height:32px;border-radius:999px;font-size:18px;line-height:1;cursor:pointer;flex:none}
+.sc-steps{margin:0;padding-left:1.4em;display:grid;gap:2px}
+.sc-field{display:grid;gap:5px}
+.sc-field span{font-size:13px;font-weight:700;color:var(--muted)}
+.sc-field input{width:100%;min-width:0;height:44px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:0 10px;font:inherit;font-family:var(--font-num);font-size:15px}
+.sc-tip{font-size:13px;color:var(--muted);background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.sc-note,.sc-sum{font-size:12.5px;color:var(--muted)}
+.sc-sum{font-size:13.5px;color:var(--ink)}
+.sc-msg{padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:14px}
+.sc-msg.err{background:var(--loss-soft)}
+.sc-notes{margin:0;padding:8px 10px 8px 1.6em;background:var(--carry-soft);border-radius:8px;font-size:12.5px;display:grid;gap:3px}
+.sc-acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sc-acts .sp{flex:1}
+.sc-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;line-height:1.4}
+a.sc-btn{justify-self:start}
+.sc-btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.sc-foot{text-align:center}
+.sc-link{border:0;background:none;color:var(--accent-strong);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:4px}
+.sc-load{display:flex;align-items:center;gap:12px;padding:18px 4px;font-size:14px}
+.sc-spin{width:24px;height:24px;border-radius:50%;border:3px solid var(--accent-soft);border-top-color:var(--accent);flex:none}
+@media (prefers-reduced-motion: no-preference){.sc-spin{animation:sc-rot .8s linear infinite}}
+@keyframes sc-rot{to{transform:rotate(360deg)}}
+.sc-grid{display:grid;grid-template-columns:minmax(62px,1fr) repeat(4,minmax(0,1.2fr));gap:5px;align-items:center}
+.sc-th{font-size:11.5px;font-weight:700;color:var(--muted);text-align:right;padding-right:2px}
+.sc-rh{display:grid;line-height:1.25;min-width:0}
+.sc-rh b{font-size:13px;white-space:nowrap}
+.sc-rh em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--bonus)}
+.sc-cell{display:grid;gap:1px;min-width:0;border-radius:8px}
+.sc-cell small{font-family:var(--font-num);font-size:10.5px;color:var(--muted);text-align:right;padding-right:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-n{width:100%;min-width:0;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:0 7px;font:inherit;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:15.5px;font-weight:600;text-align:right;-moz-appearance:textfield;appearance:textfield}
+.sc-n::-webkit-inner-spin-button,.sc-n::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.sc-cell.chg .sc-n{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.sc-cell.fix .sc-n{box-shadow:0 0 0 2px var(--carry)}
+.sc-cell.miss .sc-n{border-style:dashed;color:var(--muted)}
+.sc-list{display:grid;gap:8px}
+.sc-row{grid-template-columns:auto minmax(0,1fr) 128px;align-items:center;gap:10px}
+.sc-row .sc-nm{display:grid;line-height:1.3;font-weight:700;font-size:14px}
+.sc-row .sc-nm small{text-align:left;padding:0;font-weight:500}
+.sc-sw{display:inline-block;width:14px;height:18px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.sc-sw.s0{background:var(--rw);box-shadow:inset 0 0 0 1px var(--rw-edge)}
+.sc-sw.s1{background:var(--rb)}.sc-sw.s2{background:var(--ry)}.sc-sw.s3{background:var(--rp)}
+.sc-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.sc-legend .lg{display:inline-flex;align-items:center;gap:5px}
+.sc-legend .lg::before{content:"";width:16px;height:11px;border-radius:3px;border:1px solid var(--line);background:var(--surface-2)}
+.sc-legend .lg.chg::before{background:var(--accent-soft);border-color:var(--accent)}
+.sc-legend .lg.fix::before{box-shadow:0 0 0 2px var(--carry)}
+.sc-legend .lg.miss::before{border-style:dashed;border-color:var(--muted)}
+.sc-chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;cursor:pointer}
+.sc-chk input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.sc-chk small{display:block;font-size:12px;color:var(--muted)}
+.sc-chk small.warn{color:var(--loss)}
+.sc-toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-family:var(--font-ui);font-size:13.5px;font-weight:700;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
+.sc-toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:380px){.sc-grid{grid-template-columns:54px repeat(4,minmax(0,1fr));gap:4px}.sc-n{font-size:14.5px;padding:0 5px}.sc-row{grid-template-columns:auto minmax(0,1fr) 112px}}
+</style>
+
 <nav class="apptabs" aria-label="計算機の切り替え">
   <div class="apptabs-in">
     <span class="brand"><span>育成計算機</span></span>
@@ -367,7 +436,8 @@ button,input{font:inherit;color:inherit}
   </section>
 
   <section class="card" aria-labelledby="ue-h-inv">
-    <div class="card-h"><h2 id="ue-h-inv">手持ち素材 <span class="en">Inventory</span></h2><button type="button" class="ghost" id="ue-zero">すべて0にする</button></div>
+    <div class="card-h"><h2 id="ue-h-inv">手持ち素材 <span class="en">Inventory</span></h2><div class="card-acts"><button type="button" class="scanbtn" id="ue-scan"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>スクショで読み込む</button><button type="button" class="ghost" id="ue-zero">すべて0にする</button></div></div>
+    <p class="scanhint">ゲームの「固有武器の強化」の材料リストをスクショして読み込むと、数が入ります。</p>
     <div class="sample" id="ue-sample" hidden><span>サンプルの数値が入っています。ゲームの所持数に書き換えてください。</span></div>
     <div class="inv" id="ue-inv"></div>
     <div class="capline">
@@ -454,7 +524,8 @@ button,input{font:inherit;color:inherit}
   </section>
 
   <section class="card" aria-labelledby="rp-h-inv">
-    <div class="card-h"><h2 id="rp-h-inv">手持ちレポート <span class="en">Inventory</span></h2><button type="button" class="ghost" id="rp-zero">すべて0にする</button></div>
+    <div class="card-h"><h2 id="rp-h-inv">手持ちレポート <span class="en">Inventory</span></h2><div class="card-acts"><button type="button" class="scanbtn" id="rp-scan"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>スクショで読み込む</button><button type="button" class="ghost" id="rp-zero">すべて0にする</button></div></div>
+    <p class="scanhint">レポートと所持数が写ったスクショを読み込むと、数が入ります。</p>
     <div class="sample" id="rp-sample" hidden>サンプルの数値が入っています。ゲームの所持数に書き換えてください。</div>
     <div class="inv" id="rp-inv"></div>
     <div class="capline">
@@ -556,6 +627,444 @@ button,input{font:inherit;color:inherit}
   else if(h==='ue'||h==='weapon')first='ue';
   else{try{const s=localStorage.getItem(KEY);if(s==='ue'||s==='rp')first=s;}catch(e){}}
   show(first,false);
+})();
+</script>
+<script>
+// スクショ読み込み：ゲーム画面のスクショから手持ち数を読み取る（Google Gemini API・キーはこの端末だけに保存）
+(function(){
+  'use strict';
+  const KEY_K='ba-scan-key', MODEL_K='ba-scan-model';
+  const MODELS=['gemini-flash-latest','gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite'];
+  const API='https://generativelanguage.googleapis.com/v1beta/models/';
+  const KEY_URL='https://aistudio.google.com/apikey';
+  const MAX_SIDE=2048;
+  const COLOR={gray:0,blue:1,gold:2,purple:3};
+  const SHAPE={spring:0,hammer:1,barrel:2,pin:3};
+  const THIN=t=>t===2||t===3;
+  const ls={get(k){try{return localStorage.getItem(k)||'';}catch(e){return '';}},set(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}};
+  const fmt=n=>Math.round(n).toLocaleString('ja-JP');
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const int=(v,d)=>{const n=parseInt(v,10);return Number.isFinite(n)?n:d;};
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  class ScanError extends Error{constructor(kind,msg){super(msg||kind);this.kind=kind;}}
+
+  /* ---------- 読み取り結果の整理 ---------- */
+  // "x3971" "×3,971" "x96K" → {n, approx}
+  function parseCount(txt){
+    const s=String(txt==null?'':txt).replace(/[\s,，]/g,'');
+    const m=s.match(/(\d+(?:\.\d+)?)([KkMm万]?)/);
+    if(!m)return null;
+    let n=parseFloat(m[1]),approx=false;
+    const u=m[2].toUpperCase();
+    if(u==='K'){n*=1e3;approx=true;}else if(u==='M'){n*=1e6;approx=true;}else if(u==='万'){n*=1e4;approx=true;}
+    n=Math.round(n);
+    return Number.isFinite(n)&&n>=0?{n,approx}:null;
+  }
+  // ボーナスマークの有無と武器種から、形の読み違い（撃針↔銃身など）を直す
+  function fixType(t,bonus,B){
+    const ok=i=>!!B[i]===!!bonus;
+    if(ok(t))return{t,fixed:false};
+    const cand=[0,1,2,3].filter(ok);
+    const same=cand.filter(i=>THIN(i)===THIN(t));
+    if(same.length===1)return{t:same[0],fixed:true};
+    if(cand.length===1)return{t:cand[0],fixed:true};
+    return{t:null,fixed:true};
+  }
+  function firstMeta(raws){
+    const m={};
+    for(const raw of raws)for(const k of['weapon_type','stars','level','exp','exp_max'])if(m[k]==null&&raw&&raw[k]!=null&&raw[k]!=='')m[k]=raw[k];
+    return m;
+  }
+  function reviewWeapon(app,raws){
+    const cur=app.current();
+    const m=firstMeta(raws);
+    let wcode=null;
+    if(m.weapon_type){const c=String(m.weapon_type).toUpperCase().replace(/[^A-Z]/g,'');if(app.bonusFor(c))wcode=c;}
+    const B=wcode?app.bonusFor(wcode):cur.bonus;
+    const cells={},conflicts=[];let skipped=0,other=0;
+    for(const raw of raws)for(const it of(raw&&Array.isArray(raw.items)?raw.items:[])){
+      if(!it)continue;
+      if(it.shape==='report'){other++;continue;}
+      const r=COLOR[it.color],t0=SHAPE[it.shape],c=parseCount(it.count_text);
+      if(r==null||t0==null||!c){skipped++;continue;}
+      const f=fixType(t0,!!it.bonus,B);
+      if(f.t==null){skipped++;continue;}
+      const k=f.t+'-'+r;
+      if(cells[k]){if(cells[k].n!==c.n)conflicts.push({k,a:cells[k].n,b:c.n});else if(!f.fixed)cells[k].fixed=false;continue;}
+      cells[k]={t:f.t,r,n:c.n,approx:c.approx,fixed:f.fixed};
+    }
+    // 武器の状態（★・Lv・EXP）
+    const meta={};
+    if(wcode)meta.weapon=wcode;
+    const star=int(m.stars,null);if(star>=1&&star<=app.maxStar)meta.star=star;
+    const lv=int(m.level,null);if(lv>=1&&lv<=app.maxLv)meta.lv=lv;
+    let lvOk=true;
+    if(meta.lv){
+      const ex=int(m.exp,null),mx=int(m.exp_max,null),nx=app.expNext(meta.lv);
+      if(mx!=null&&nx!=null&&mx!==nx)lvOk=false;
+      if(ex!=null&&ex>=0&&(nx==null||ex<nx))meta.exp=ex;
+    }
+    return{kind:'weapon',cells,conflicts,skipped,other,meta,lvOk,B,cur,wcode};
+  }
+  function reviewReport(app,raws){
+    const cur=app.current();
+    const m=firstMeta(raws);
+    const cells={},conflicts=[];let skipped=0,other=0;
+    for(const raw of raws)for(const it of(raw&&Array.isArray(raw.items)?raw.items:[])){
+      if(!it)continue;
+      if(SHAPE[it.shape]!=null){other++;continue;}
+      const r=COLOR[it.color],c=parseCount(it.count_text);
+      if(r==null||!c){skipped++;continue;}
+      if(cells[r]){if(cells[r].n!==c.n)conflicts.push({k:r,a:cells[r].n,b:c.n});continue;}
+      cells[r]={r,n:c.n,approx:c.approx,fixed:false};
+    }
+    const meta={};
+    const lv=int(m.level,null);if(lv>=1&&lv<=app.maxLv)meta.lv=lv;
+    let lvOk=true;
+    if(meta.lv){
+      const ex=int(m.exp,null),mx=int(m.exp_max,null),nx=app.expNext(meta.lv);
+      if(mx!=null&&nx!=null&&mx!==nx)lvOk=false;
+      if(ex!=null&&ex>=0&&(nx==null||ex<nx))meta.exp=ex;
+    }
+    return{kind:'report',cells,conflicts,skipped,other,meta,lvOk,cur};
+  }
+
+  /* ---------- Gemini ---------- */
+  const SCHEMA={type:'OBJECT',properties:{
+    items:{type:'ARRAY',items:{type:'OBJECT',properties:{
+      shape:{type:'STRING',enum:['spring','hammer','barrel','pin','report','other']},
+      color:{type:'STRING',enum:['gray','blue','gold','purple','other']},
+      bonus:{type:'BOOLEAN'},
+      count_text:{type:'STRING'}
+    },required:['shape','color','bonus','count_text'],propertyOrdering:['shape','color','bonus','count_text']}},
+    weapon_type:{type:'STRING',nullable:true},
+    stars:{type:'INTEGER',nullable:true},
+    level:{type:'INTEGER',nullable:true},
+    exp:{type:'INTEGER',nullable:true},
+    exp_max:{type:'INTEGER',nullable:true}
+  },required:['items'],propertyOrdering:['items','weapon_type','stars','level','exp','exp_max']};
+
+  const HEAD='You are reading a screenshot from the Japanese version of the mobile game Blue Archive. Reply with JSON only.\n\n';
+  const PROMPT={
+    weapon:HEAD+
+`It should show the unique weapon enhancement screen (固有武器の強化) with a material grid (材料リスト) of weapon EXP parts.
+
+For EVERY material card in the grid, add one entry to "items" (skip a card only if its count is cut off and unreadable):
+- shape: what the part looks like
+  "spring" = a coil spring
+  "hammer" = a flat, chunky metal piece with a round hole (a gun hammer)
+  "barrel" = a long straight tube of even thickness
+  "pin" = a thin firing pin with a small knob and steps near one end
+- color: the card's background gradient: "gray" (white/gray), "blue", "gold" (yellow/orange), "purple"
+- bonus: true only if the card has a green "Bonus" tag at its top-left
+- count_text: the owned count printed at the card's bottom-right, copied exactly (e.g. "x3971", "x96K")
+Ignore the dark bar under each card (it shows how many are selected, usually 0).
+
+From the weapon panel, fill these if visible, otherwise null:
+- weapon_type: the letter code at the weapon image's bottom-right (e.g. "GL")
+- stars: how many stars are shown next to the weapon name
+- level: the number in "Lv.50"
+- exp, exp_max: the two numbers on the EXP bar (e.g. "45/1920" gives 45 and 1920)`,
+    report:HEAD+
+`It should show activity reports (clipboards labeled "REPORT"), e.g. on the student level-up screen.
+
+For EVERY report card, add one entry to "items":
+- shape: "report"
+- color: the card and clipboard color: "gray" (white/gray, 初級), "blue" (中級), "gold" (yellow/orange, 上級), "purple" (最上級)
+- bonus: false
+- count_text: the owned count printed at the card's bottom-right, copied exactly (e.g. "x2690", "x96K")
+Ignore the dark bar under each card (it shows how many are selected, usually 0).
+
+If the screen also shows the student's level and EXP bar, fill level, exp and exp_max (e.g. "Lv.80" and "1234/39385"); otherwise null. weapon_type and stars are null.`
+  };
+
+  async function readErr(res){
+    let msg='',status='';
+    try{const j=await res.json();msg=(j.error&&j.error.message)||'';status=(j.error&&j.error.status)||'';}catch(e){}
+    return{code:res.status,msg,status};
+  }
+  async function generate(key,body,signal){
+    const list=[...new Set([ls.get(MODEL_K),...MODELS].filter(Boolean))];
+    let last=null;const codes=new Set();
+    for(const model of list){
+      let b=body,dropped=false,retried=false;
+      for(;;){
+        let res;
+        try{
+          res=await fetch(API+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(b),signal});
+        }catch(e){
+          if(e&&e.name==='AbortError')throw e;
+          throw new ScanError(navigator.onLine===false?'offline':'network');
+        }
+        if(res.ok){const j=await res.json();ls.set(MODEL_K,model);return j;}
+        const er=await readErr(res);last=er;codes.add(er.code);
+        if(er.code===400&&/api key|API_KEY/i.test(er.msg+er.status))throw new ScanError('key',er.msg);
+        if(er.code===401)throw new ScanError('perm',er.msg);
+        if(er.code===400&&!dropped&&/schema|response_?mime|responseSchema/i.test(er.msg)){
+          b=JSON.parse(JSON.stringify(b));delete b.generationConfig.responseSchema;dropped=true;continue;
+        }
+        if(er.code>=500&&!retried){retried=true;await sleep(1200);continue;}
+        break; // 403・404（そのモデルが使えない）・429（そのモデルの無料枠切れ）・5xx は次のモデルへ
+      }
+    }
+    if(codes.has(429))throw new ScanError('quota',last&&last.msg);
+    if(codes.has(403))throw new ScanError('perm',last&&last.msg);
+    throw new ScanError('api',last?`${last.code} ${last.msg}`:'');
+  }
+  function extractJSON(j){
+    const c=j&&j.candidates&&j.candidates[0];
+    if(!c){throw new ScanError('blocked',(j&&j.promptFeedback&&j.promptFeedback.blockReason)||'');}
+    const t=((c.content&&c.content.parts)||[]).filter(p=>p&&typeof p.text==='string'&&!p.thought).map(p=>p.text).join('');
+    try{return JSON.parse(t);}catch(e){}
+    const m=t.match(/\{[\s\S]*\}/);
+    if(m){try{return JSON.parse(m[0]);}catch(e){}}
+    throw new ScanError('parse');
+  }
+  async function readImage(img,mode,signal){
+    const key=ls.get(KEY_K);
+    if(!key)throw new ScanError('nokey');
+    const body={contents:[{role:'user',parts:[{inline_data:{mime_type:img.mime,data:img.data}},{text:PROMPT[mode]}]}],generationConfig:{responseMimeType:'application/json',responseSchema:SCHEMA}};
+    return extractJSON(await generate(key,body,signal));
+  }
+  async function prep(file){
+    const url=URL.createObjectURL(file);
+    try{
+      const img=await new Promise((ok,ng)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>ng(new ScanError('image'));i.src=url;});
+      const w=img.naturalWidth,h=img.naturalHeight,k=Math.min(1,MAX_SIDE/Math.max(w,h));
+      const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+      const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
+      return{mime:'image/jpeg',data:c.toDataURL('image/jpeg',0.9).split(',')[1]};
+    }finally{URL.revokeObjectURL(url);}
+  }
+
+  /* ---------- ダイアログ ---------- */
+  const apps={};
+  let dlg=null,box=null,fileIn=null,ctx=null,toastEl=null,toastT=0;
+  const ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>';
+
+  function ensureDom(){
+    if(dlg)return;
+    dlg=document.createElement('dialog');dlg.className='sc';dlg.setAttribute('aria-labelledby','sc-title');
+    dlg.innerHTML='<div class="sc-in" id="sc-box"></div>';
+    document.body.appendChild(dlg);
+    box=dlg.querySelector('#sc-box');
+    fileIn=document.createElement('input');fileIn.type='file';fileIn.accept='image/*';fileIn.multiple=true;fileIn.hidden=true;fileIn.setAttribute('aria-hidden','true');
+    document.body.appendChild(fileIn);
+    fileIn.addEventListener('change',onFiles);
+    dlg.addEventListener('close',()=>{if(ctx&&ctx.busy){ctx.busy.abort();ctx.busy=null;}});
+    dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+    box.addEventListener('click',onClick);
+    box.addEventListener('input',onInput);
+    box.addEventListener('change',onChange);
+  }
+  function openDlg(){if(!dlg.open){try{dlg.showModal();}catch(e){dlg.setAttribute('open','');}}}
+  function closeDlg(){if(dlg&&dlg.open)dlg.close();}
+  function head(title,canClose){return`<div class="sc-h"><h2 id="sc-title">${title}</h2>${canClose===false?'':'<button type="button" class="sc-x" data-act="close" aria-label="閉じる">×</button>'}</div>`;}
+  function toast(msg){
+    if(!toastEl){toastEl=document.createElement('div');toastEl.className='sc-toast';toastEl.setAttribute('role','status');document.body.appendChild(toastEl);}
+    toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),2200);
+  }
+
+  function start(id){
+    const app=apps[id];if(!app)return;
+    ensureDom();
+    ctx={id,app,raws:[],files:0,edits:{},zeroMissing:true,applyMeta:null,busy:null,review:null};
+    if(!ls.get(KEY_K)){renderSetup();openDlg();return;}
+    pick();
+  }
+  function pick(){fileIn.value='';fileIn.click();}
+
+  function tipHTML(app){
+    return app.mode==='weapon'
+      ?'<p class="sc-tip">ゲームの「固有武器の強化」画面で、材料リストが写るようにスクショしてください。下に続くときはスクロールして2枚に分けてOK（まとめて選べます）。</p>'
+      :'<p class="sc-tip">生徒のレベルアップ画面などで、4種類のレポートと所持数が写るようにスクショしてください。</p>';
+  }
+  function renderSetup(msg){
+    const has=!!ls.get(KEY_K);
+    box.innerHTML=head(has?'APIキーの設定':'スクショ読み込みの準備')+
+      (msg?`<p class="sc-msg err">${esc(msg)}</p>`:'')+
+      `<p>スクショの数字は、Google の AI（Gemini）で読み取ります。はじめに1回だけ、無料の API キーを入れてください。</p>
+      <ol class="sc-steps"><li>下のボタンから Google AI Studio を開いて、Google アカウントでログイン</li><li>「API キーを作成」でキーを作って、コピー</li><li>ここに貼り付けて保存</li></ol>
+      <a class="sc-btn" href="${KEY_URL}" target="_blank" rel="noopener">Google AI Studio を開く ↗</a>
+      <label class="sc-field"><span>API キー</span><input id="sc-key" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="AIza…" value="${esc(ls.get(KEY_K))}"></label>
+      <p class="sc-msg err" id="sc-keyerr" hidden></p>
+      ${tipHTML(ctx.app)}
+      <div class="sc-acts">${has?'<button type="button" class="sc-btn" data-act="delkey">キーを消す</button>':''}<span class="sp"></span><button type="button" class="sc-btn pri" data-act="savekey">${ICON}保存してスクショを選ぶ</button></div>
+      <p class="sc-note">キーはこの端末の中だけに保存され、読み取りで Google に画像を送るときにだけ使います。無料枠では、送った画像が Google の AI の改善に使われることがあります。</p>`;
+  }
+  function renderReading(done,n){
+    box.innerHTML=head('読み取り中…',false)+
+      `<div class="sc-load"><span class="sc-spin" aria-hidden="true"></span><span>${n>1?`${done}/${n}枚 `:''}数秒〜20秒ほどかかります</span></div>
+      <div class="sc-acts"><span class="sp"></span><button type="button" class="sc-btn" data-act="cancel">やめる</button></div>`;
+  }
+  function errText(e){
+    const k=e&&e.kind;
+    if(k==='offline')return'オフラインのようです。ネットにつながっているときに読み込んでください。';
+    if(k==='network')return'Google につながりませんでした。電波のいいところで、もう一度試してください。';
+    if(k==='key')return'API キーが正しくないようです。コピーし直して、もう一度入れてください。';
+    if(k==='perm')return'この API キーでは使えませんでした。キーを作り直すか、キーの制限設定を確認してください。';
+    if(k==='quota')return'無料枠の上限に達しました。少し時間をおいてから、もう一度試してください。';
+    if(k==='image')return'画像を開けませんでした。スクショの画像（PNG・JPEG）を選んでください。';
+    if(k==='parse'||k==='blocked')return'うまく読み取れませんでした。もう一度試すか、別のスクショを選んでください。';
+    if(k==='empty')return ctx.app.mode==='weapon'?'素材が見つかりませんでした。「固有武器の強化」の材料リストが写ったスクショを選んでください。':'レポートが見つかりませんでした。4種類のレポートが写ったスクショを選んでください。';
+    if(k==='wrong')return ctx.app.mode==='weapon'?'レポートの画面のようです。レポートのタブで読み込んでください。':'固有武器の素材の画面のようです。固有武器のタブで読み込んでください。';
+    return'読み取りに失敗しました。'+(e&&e.message&&e.message!==k?`（${e.message.slice(0,160)}）`:'');
+  }
+  function renderError(e){
+    const keyish=e&&(e.kind==='key'||e.kind==='perm');
+    box.innerHTML=head('読み取れませんでした')+
+      `<p class="sc-msg err">${esc(errText(e))}</p>`+
+      (ctx.raws.length?'<p class="sc-tip">前に読み取った分は残っています。</p>':'')+
+      `<div class="sc-acts">${keyish?'<button type="button" class="sc-btn" data-act="key">キーを入れ直す</button>':''}<span class="sp"></span>${ctx.raws.length?'<button type="button" class="sc-btn" data-act="back">結果に戻る</button>':''}<button type="button" class="sc-btn pri" data-act="repick">${ICON}スクショを選び直す</button></div>`;
+  }
+
+  function buildReview(){
+    const app=ctx.app;
+    const rv=app.mode==='weapon'?reviewWeapon(app,ctx.raws):reviewReport(app,ctx.raws);
+    if(ctx.applyMeta==null)ctx.applyMeta=rv.lvOk;
+    ctx.review=rv;
+    return rv;
+  }
+  function valOf(rv,k){
+    if(ctx.edits[k]!=null)return ctx.edits[k];
+    const c=rv.cells[k];if(c)return c.n;
+    if(ctx.zeroMissing)return 0;
+    return curOf(rv,k);
+  }
+  function curOf(rv,k){
+    if(rv.kind==='weapon'){const[t,r]=k.split('-').map(Number);return rv.cur.inv[t][r];}
+    return rv.cur.inv[+k];
+  }
+  function cellCls(rv,k){
+    const c=rv.cells[k],cls=[];
+    if(!c)cls.push('miss');
+    if(c&&c.fixed)cls.push('fix');
+    if(valOf(rv,k)!==curOf(rv,k))cls.push('chg');
+    return cls.join(' ');
+  }
+  function renderReview(){
+    const rv=buildReview(),app=ctx.app;
+    const found=Object.keys(rv.cells).length;
+    if(!found){renderError(new ScanError(rv.other?'wrong':'empty'));return;}
+    const total=rv.kind==='weapon'?16:4,missing=total-found;
+    const notes=[];
+    if(Object.values(rv.cells).some(c=>c.approx))notes.push('「K」表示の数は千の単位までしか見えないので、96K なら 96,000 のように入れています。');
+    if(rv.conflicts.length){
+      const nm=x=>rv.kind==='weapon'?app.itemName(...x.k.split('-').map(Number)):app.names[x.k];
+      notes.push('スクショによって数が違った素材があります（'+rv.conflicts.map(x=>`${nm(x)}：${fmt(x.a)}／${fmt(x.b)}`).join('、')+'）。先に読んだ数を入れているので、確認してください。');
+    }
+    if(Object.values(rv.cells).some(c=>c.fixed))notes.push('ボーナスマークをもとに、素材の種類を直したところがあります（黄色の枠）。');
+    if(rv.skipped)notes.push(`読み取れなかったカードが${rv.skipped}枚ありました。`);
+
+    let grid='';
+    if(rv.kind==='weapon'){
+      grid='<div class="sc-grid"><div></div>'+app.tierNames.map(n=>`<div class="sc-th">${n}</div>`).join('');
+      for(let t=0;t<4;t++){
+        grid+=`<div class="sc-rh"><b>${app.typeNames[t]}</b>${rv.B[t]?'<em>ボーナス</em>':''}</div>`;
+        for(let r=0;r<4;r++){
+          const k=t+'-'+r;
+          grid+=`<label class="sc-cell ${cellCls(rv,k)}" data-cell="${k}"><input class="sc-n" type="number" inputmode="numeric" min="0" step="1" data-k="${k}" value="${valOf(rv,k)}" aria-label="${esc(app.itemName(t,r))}"><small>前 ${fmt(curOf(rv,k))}</small></label>`;
+        }
+      }
+      grid+='</div>';
+    }else{
+      grid='<div class="sc-list">'+[0,1,2,3].map(r=>{const k=String(r);return`<label class="sc-row sc-cell ${cellCls(rv,k)}" data-cell="${k}"><span class="sc-sw s${r}" aria-hidden="true"></span><span class="sc-nm">${esc(app.names[r])}<small>前 ${fmt(curOf(rv,k))}</small></span><input class="sc-n" type="number" inputmode="numeric" min="0" step="1" data-k="${k}" value="${valOf(rv,k)}" aria-label="${esc(app.names[r])}"></label>`;}).join('')+'</div>';
+    }
+
+    let metaHTML='';
+    const M=rv.meta;
+    if(M.lv||M.star||M.weapon){
+      const parts=[];
+      if(rv.kind==='weapon'){if(M.weapon)parts.push(M.weapon);if(M.star)parts.push('★'+M.star);}
+      if(M.lv)parts.push('Lv'+M.lv);
+      if(M.exp!=null)parts.push('EXP '+fmt(M.exp));
+      const sw=rv.kind==='weapon'&&M.weapon&&M.weapon!==rv.cur.weapon?`<small>武器種が ${esc(rv.cur.weapon)} から ${esc(M.weapon)} に変わります</small>`:'';
+      metaHTML=`<label class="sc-chk"><input type="checkbox" data-opt="meta"${ctx.applyMeta?' checked':''}><span>${rv.kind==='weapon'?'武器の状態':'生徒のLv'}も反映する（${esc(parts.join('・'))}）${sw}${rv.lvOk?'':'<small class="warn">Lvの読み取りが合っていないかもしれません</small>'}</span></label>`;
+    }
+
+    box.innerHTML=head('読み取り結果')+
+      `<p class="sc-sum">${ctx.files}枚のスクショから <b>${found}</b> 種類見つかりました。違うところは直してから反映してください。</p>`+
+      (notes.length?`<ul class="sc-notes">${notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:'')+
+      grid+
+      `<p class="sc-legend"><span class="lg chg">変わる</span>${Object.values(rv.cells).some(c=>c.fixed)?'<span class="lg fix">種類を直した</span>':''}${missing?'<span class="lg miss">写っていない</span>':''}</p>`+
+      (missing?`<label class="sc-chk"><input type="checkbox" data-opt="zero"${ctx.zeroMissing?' checked':''}><span>写っていない${rv.kind==='weapon'?'素材':'レポート'}は0にする<small>ゲームでは持っていないものは表示されません。スクショが足りないときはオフにしてください</small></span></label>`:'')+
+      metaHTML+
+      `<div class="sc-acts"><button type="button" class="sc-btn" data-act="add">${ICON}スクショを追加</button><span class="sp"></span><button type="button" class="sc-btn" data-act="close">やめる</button><button type="button" class="sc-btn pri" data-act="apply">反映する</button></div>
+      <p class="sc-foot"><button type="button" class="sc-link" data-act="key">APIキーの設定</button></p>`;
+  }
+
+  async function onFiles(){
+    const files=[...(fileIn.files||[])];
+    if(!files.length||!ctx)return;
+    ensureDom();openDlg();
+    const ac=new AbortController();ctx.busy=ac;
+    let done=0;renderReading(0,files.length);
+    try{
+      const out=new Array(files.length);let i=0;
+      const worker=async()=>{while(i<files.length){const j=i++;const img=await prep(files[j]);out[j]=await readImage(img,ctx.app.mode,ac.signal);done++;if(ctx.busy===ac)renderReading(done,files.length);}};
+      await Promise.all([worker(),worker()]);
+      if(ctx.busy!==ac)return;
+      ctx.busy=null;
+      ctx.raws.push(...out);ctx.files+=files.length;
+      renderReview();
+    }catch(e){
+      if(ctx.busy!==ac||(e&&e.name==='AbortError'))return;
+      ctx.busy=null;ac.abort();
+      if(e&&e.kind==='nokey'){renderSetup();return;}
+      if(e&&e.kind==='key'){renderSetup(errText(e));return;}
+      renderError(e);
+    }
+  }
+
+  function onClick(e){
+    const b=e.target.closest('[data-act]');if(!b)return;
+    const a=b.dataset.act;
+    if(a==='close'){closeDlg();return;}
+    if(a==='cancel'){if(ctx.busy){ctx.busy.abort();ctx.busy=null;}if(ctx.raws.length)renderReview();else closeDlg();return;}
+    if(a==='savekey'){
+      const v=(box.querySelector('#sc-key').value||'').replace(/\s+/g,'');
+      const er=box.querySelector('#sc-keyerr');
+      if(v.length<20){er.textContent='キーを貼り付けてください（AIza から始まる長い文字列です）。';er.hidden=false;return;}
+      ls.set(KEY_K,v);ls.set(MODEL_K,'');
+      if(ctx.raws.length){renderReview();return;}
+      pick();
+      box.innerHTML=head('スクショを選んでください')+tipHTML(ctx.app)+`<div class="sc-acts"><span class="sp"></span><button type="button" class="sc-btn pri" data-act="repick">${ICON}スクショを選ぶ</button></div><p class="sc-foot"><button type="button" class="sc-link" data-act="key">APIキーの設定</button></p>`;
+      return;
+    }
+    if(a==='delkey'){ls.set(KEY_K,'');ls.set(MODEL_K,'');renderSetup();toast('APIキーを消しました');return;}
+    if(a==='key'){renderSetup();return;}
+    if(a==='repick'||a==='add'){pick();return;}
+    if(a==='back'){renderReview();return;}
+    if(a==='apply'){
+      const rv=ctx.review;
+      const payload={inv:null,meta:null};
+      if(rv.kind==='weapon')payload.inv=[0,1,2,3].map(t=>[0,1,2,3].map(r=>Math.max(0,valOf(rv,t+'-'+r)|0)));
+      else payload.inv=[0,1,2,3].map(r=>Math.max(0,valOf(rv,String(r))|0));
+      if(ctx.applyMeta&&Object.keys(rv.meta).length)payload.meta=rv.meta;
+      ctx.app.apply(payload);
+      closeDlg();
+      toast(ctx.app.mode==='weapon'?'手持ち素材に反映しました':'手持ちレポートに反映しました');
+    }
+  }
+  function onInput(e){
+    const i=e.target;if(!i.matches('.sc-n'))return;
+    const k=i.dataset.k,v=i.value.trim();
+    ctx.edits[k]=v===''?0:Math.max(0,int(v,0));
+    const cell=i.closest('[data-cell]');if(cell)cell.className=cell.className.replace(/\b(miss|fix|chg)\b/g,'').trim()+' '+cellCls(ctx.review,k);
+  }
+  function onChange(e){
+    const i=e.target;if(!i.matches('[data-opt]'))return;
+    if(i.dataset.opt==='zero'){ctx.zeroMissing=i.checked;renderReview();}
+    if(i.dataset.opt==='meta')ctx.applyMeta=i.checked;
+  }
+
+  window.BAScan={
+    register(id,app){apps[id]=app;},
+    start,
+    icon:ICON,
+    _t:{parseCount,fixType,reviewWeapon,reviewReport,extractJSON}
+  };
 })();
 </script>
 <script>
@@ -979,6 +1488,28 @@ function reachEstimate(segs,avail){
   $('#ue-toRes').addEventListener('click',()=>{$('#ue-result').scrollIntoView({block:'start'});});
   document.querySelectorAll('.app-ue input.n').forEach(i=>i.addEventListener('blur',()=>paint()));
 
+  /* ---------- スクショ読み込み ---------- */
+  const bonusFor=code=>{const w=WEAPONS.find(x=>x[0]===code);return w?[0,1,2,3].map(t=>t===PIN||t===w[2]):null;};
+  if(window.BAScan){
+    window.BAScan.register('ue',{
+      mode:'weapon',maxLv:MAXLV,maxStar:4,
+      typeNames:TYPES.map(t=>t.name),tierNames:['錆びた','普通','クロム','チタン'],itemName,bonusFor,
+      expNext:lv=>lv>=1&&lv<MAXLV?TOTAL[lv+1]-TOTAL[lv]:null,
+      current:()=>({weapon:st.weapon,bonus:st.bonus.slice(),inv:st.inv.map(a=>a.slice()),star:st.star,lv:st.lv,exp:st.exp}),
+      apply:({inv,meta})=>{
+        st.inv=inv;st.sample=false;
+        if(meta){
+          if(meta.weapon&&bonusFor(meta.weapon)){st.weapon=meta.weapon;st.bonus=bonusFor(meta.weapon);}
+          if(meta.star)st.star=meta.star;
+          if(meta.lv){st.lv=meta.lv;st.exp=meta.exp!=null?meta.exp:0;}
+          if(st.target<=st.lv){const nc=st.caps.find(c=>c>st.lv);st.target=nc||st.caps[3];}
+        }
+        update();
+      }
+    });
+    $('#ue-scan').addEventListener('click',()=>window.BAScan.start('ue'));
+  }else{$('#ue-scan').hidden=true;}
+
   paint();compute();
 })();
 })();
@@ -1317,6 +1848,22 @@ function levelAt(totalExp,cap){let L=1;while(L<cap&&TOTAL[L+1]<=totalExp)L++;ret
   $('#rp-backRec').addEventListener('click',()=>{st.manualP=null;compute();});
   $('#rp-toRes').addEventListener('click',()=>$('#rp-result').scrollIntoView({block:'start'}));
   document.querySelectorAll('.app-rp input.n').forEach(i=>{i.addEventListener('focus',()=>i.select());i.addEventListener('blur',()=>paint());});
+
+  /* ---------- スクショ読み込み ---------- */
+  if(window.BAScan){
+    window.BAScan.register('rp',{
+      mode:'report',maxLv:MAXLV,
+      names:R.map(r=>`${r.n}（${r.c}）`),
+      expNext:lv=>lv>=1&&lv<MAXLV?TOTAL[lv+1]-TOTAL[lv]:null,
+      current:()=>({inv:st.inv.slice(),lv:st.lv,exp:st.exp}),
+      apply:({inv,meta})=>{
+        st.inv=inv;st.sample=false;
+        if(meta&&meta.lv){st.lv=meta.lv;st.exp=meta.exp!=null?meta.exp:0;if(st.teacher<st.lv)st.teacher=st.lv;if(st.target<=st.lv)st.target=Math.min(Math.max(st.teacher,st.lv+1),MAXLV);}
+        update(true);
+      }
+    });
+    $('#rp-scan').addEventListener('click',()=>window.BAScan.start('rp'));
+  }else{$('#rp-scan').hidden=true;}
 
   paint();compute();
 })();
