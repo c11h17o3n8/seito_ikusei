@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ブルアカ育成計算機</title>
+<meta name="description" content="ブルアカの固有武器の強化素材とレポート配分の計算機">
+<meta name="theme-color" content="#edf3f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c141e" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="育成計算機">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one 720px tool column per calculator, switched by a sticky tab strip; both calculators keep their own UI and fixed summary bar. */
+:root{--bg:#edf3f9;--surface:#ffffff;--surface-2:#f4f8fc;--ink:#14243a;--muted:#56687e;--line:#d3e0ed;--accent:#1688f5;--accent-strong:#0b6fd0;--accent-soft:#e1effe;--accent-ink:#ffffff;--bonus:#11875a;--bonus-soft:#dff4ea;--loss:#cf3550;--loss-soft:#fde6ea;--carry:#a86a06;--carry-soft:#fbefd6;--stripe:rgba(22,136,245,.08);--bar:rgba(255,255,255,.92);--font-ui:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;--font-num:"Chakra Petch","Zen Kaku Gothic New",ui-monospace,"SFMono-Regular",monospace;--r:10px;--grid:#e4ecf4;--ok:#11875a;--ok-soft:#dff4ea;--rw:#eef2f6;--rw-edge:#9aa8b8;--rb:#3b8ef0;--ry:#e5ae17;--rp:#9457e3;--rp-soft:#f1e8fd}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0c141e;--surface:#132031;--surface-2:#0f1a28;--ink:#e4edf7;--muted:#93a5ba;--line:#253549;--accent:#4aa6ff;--accent-strong:#7dbdff;--accent-soft:#16324f;--accent-ink:#06121f;--bonus:#3fcf8f;--bonus-soft:#123326;--loss:#ff6f86;--loss-soft:#3a1720;--carry:#f0b44a;--carry-soft:#33260c;--stripe:rgba(74,166,255,.10);--bar:rgba(19,32,49,.94);color-scheme:dark;--grid:#1c2a3c;--ok:#3fcf8f;--ok-soft:#123326;--rw:#dfe6ee;--rw-edge:#7d8fa4;--rb:#5aa2ff;--ry:#f2c24a;--rp:#b384ff;--rp-soft:#2a1d40}}
+:root[data-theme="dark"]{--bg:#0c141e;--surface:#132031;--surface-2:#0f1a28;--ink:#e4edf7;--muted:#93a5ba;--line:#253549;--accent:#4aa6ff;--accent-strong:#7dbdff;--accent-soft:#16324f;--accent-ink:#06121f;--bonus:#3fcf8f;--bonus-soft:#123326;--loss:#ff6f86;--loss-soft:#3a1720;--carry:#f0b44a;--carry-soft:#33260c;--stripe:rgba(74,166,255,.10);--bar:rgba(19,32,49,.94);color-scheme:dark;--grid:#1c2a3c;--ok:#3fcf8f;--ok-soft:#123326;--rw:#dfe6ee;--rw-edge:#7d8fa4;--rb:#5aa2ff;--ry:#f2c24a;--rp:#b384ff;--rp-soft:#2a1d40}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+a{color:var(--accent-strong)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: no-preference){
+  html{scroll-behavior:smooth}
+}
+button,input{font:inherit;color:inherit}
+.apptabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bar);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px}
+.apptabs-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.apptabs .brand{display:inline-block;transform:skewX(-14deg);background:var(--accent);color:var(--accent-ink);padding:2px 10px;font-weight:700;font-size:12px;letter-spacing:.06em;white-space:nowrap}
+.apptabs .brand>span{display:inline-block;transform:skewX(14deg)}
+.apptabs .tabs{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface-2)}
+.apptabs .tabs button{border:0;background:transparent;padding:8px 6px;font-weight:700;font-size:14px;cursor:pointer}
+.apptabs .tabs button+button{border-left:1px solid var(--line)}
+.apptabs .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.app-ue .wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 128px;display:grid;gap:14px}
+.app-ue .num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.app-ue button,.app-ue input,.app-ue select{font:inherit;color:inherit}
+.app-ue .head{position:relative;display:grid;gap:6px;padding-block:6px 4px;overflow:hidden}
+.app-ue .head::after{content:"";position:absolute;inset:0 0 0 auto;width:42%;background:repeating-linear-gradient(-62deg,var(--stripe) 0 2px,transparent 2px 12px);pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 60%);mask-image:linear-gradient(90deg,transparent,#000 60%)}
+.app-ue .eyebrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.app-ue .tag{display:inline-block;transform:skewX(-14deg);background:var(--accent);color:var(--accent-ink);padding:2px 12px;font-weight:700;font-size:12.5px;letter-spacing:.06em}
+.app-ue .tag>span{display:inline-block;transform:skewX(14deg)}
+.app-ue .en{font-family:var(--font-num);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.app-ue h1{margin:0;font-size:clamp(26px,6vw,34px);font-weight:900;letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+.app-ue .lead{margin:0;color:var(--muted);font-size:14px;max-width:60ch}
+.app-ue .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:14px;min-width:0}
+.app-ue .card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.app-ue .card-h h2{margin:0;font-size:17px;font-weight:700;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.app-ue .field{display:grid;gap:6px;min-width:0;align-content:start}
+.app-ue .lbl{font-size:13px;font-weight:700;color:var(--muted)}
+.app-ue .hint{font-size:12.5px;color:var(--muted)}
+.app-ue .row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.app-ue .chips{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+@media (min-width:640px){
+  .app-ue .chips{grid-template-columns:repeat(11,minmax(0,1fr))}
+}
+.app-ue .chip{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 0;font-family:var(--font-num);font-weight:700;font-size:14px;letter-spacing:.04em;cursor:pointer}
+.app-ue .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.app-ue .bonusline{font-size:13px;color:var(--muted)}
+.app-ue .bonusline b{color:var(--bonus)}
+.app-ue .note{font-size:12.5px;line-height:1.55;background:var(--carry-soft);color:var(--ink);border-radius:8px;padding:8px 10px}
+.app-ue .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface-2)}
+.app-ue .seg button{flex:1 1 0;min-width:0;border:0;background:transparent;padding:9px 6px;cursor:pointer;font-weight:700;font-size:14px;line-height:1.3}
+.app-ue .seg button+button{border-left:1px solid var(--line)}
+.app-ue .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.app-ue .seg button small{display:block;font-weight:500;font-size:11px;opacity:.85}
+.app-ue input.n{width:100%;min-width:0;height:42px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:17px;font-weight:600;text-align:right;-moz-appearance:textfield;appearance:textfield}
+.app-ue input.n::-webkit-inner-spin-button,.app-ue input.n::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.app-ue input.n:disabled{opacity:.5}
+.app-ue input.n.bad{border-color:var(--loss);background:var(--loss-soft)}
+.app-ue .quick{display:flex;flex-wrap:wrap;gap:6px}
+.app-ue .quick button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.app-ue .quick button b{font-family:var(--font-num)}
+.app-ue .quick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong)}
+.app-ue .toggle{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.app-ue .toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.app-ue .inv{display:grid;grid-template-columns:minmax(78px,1.15fr) repeat(4,minmax(0,1fr));gap:6px;align-items:center}
+.app-ue .inv .th{font-size:12px;font-weight:700;color:var(--muted);text-align:right;line-height:1.25;padding-right:2px}
+.app-ue .inv .th .num{display:block;font-size:11px;font-weight:500;white-space:nowrap}
+.app-ue .inv .rh{display:grid;gap:3px;min-width:0}
+.app-ue .inv .rh .tn{font-weight:700;font-size:14px;white-space:nowrap}
+.app-ue .bt{justify-self:start;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.app-ue .bt[aria-pressed="true"]{background:var(--bonus-soft);border-color:var(--bonus);color:var(--bonus)}
+.app-ue .inv input.n{height:40px;font-size:16px;padding:0 8px}
+.app-ue .inv input.n.isb{border-color:color-mix(in srgb,var(--bonus) 45%,var(--line));background:var(--bonus-soft)}
+.app-ue .sample{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border-radius:8px;padding:8px 10px;font-size:13px}
+.app-ue .ghost{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer}
+.app-ue .invsum{font-size:12.5px;color:var(--muted)}
+.app-ue .capline{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:10px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.app-ue .capline .t{font-size:13.5px;font-weight:700}
+.app-ue .capline .t small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.app-ue .capline input.n{height:38px;background:var(--surface)}
+.app-ue input.n::placeholder{color:var(--muted);font-weight:500;font-size:14px;font-family:var(--font-ui)}
+.app-ue .tiers{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;font-size:13px;color:var(--muted)}
+.app-ue .tiers b{color:var(--ink);font-size:17px;margin-left:3px}
+@media (max-width:460px){
+  .app-ue .capline{grid-template-columns:minmax(0,1fr) 112px}
+}
+.app-ue #ue-result{scroll-margin-top:72px}
+.app-ue .sum{display:grid;gap:10px}
+.app-ue .big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.app-ue .big .k{font-weight:700;color:var(--muted);font-size:14px}
+.app-ue .big .v{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:clamp(40px,11vw,56px);font-weight:700;line-height:1;letter-spacing:-.01em}
+.app-ue .big .u{font-family:var(--font-num);font-weight:600;color:var(--muted)}
+.app-ue .pill{display:inline-block;transform:skewX(-12deg);padding:2px 10px;font-size:12.5px;font-weight:700;align-self:center}
+.app-ue .pill>span{display:inline-block;transform:skewX(12deg)}
+.app-ue .pill.ok{background:var(--bonus-soft);color:var(--bonus)}
+.app-ue .pill.carry{background:var(--carry-soft);color:var(--carry)}
+.app-ue .pill.loss{background:var(--loss-soft);color:var(--loss)}
+.app-ue .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+@media (min-width:640px){
+  .app-ue .meta{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.app-ue .meta div{background:var(--surface-2);border-radius:8px;padding:8px 10px;min-width:0}
+.app-ue .meta dt{font-size:12px;color:var(--muted);font-weight:700}
+.app-ue .meta dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:19px;font-weight:700}
+.app-ue .compare{margin:0;font-size:13.5px;border-left:3px solid var(--accent);padding:4px 0 4px 10px;color:var(--ink)}
+.app-ue .compare b{font-family:var(--font-num)}
+.app-ue .steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.app-ue .steps .lb{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--accent-strong)}
+.app-ue .steps .lb::before,.app-ue .steps .lb::after{content:"";flex:1;border-top:1px dashed var(--accent)}
+.app-ue .steps .segc{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.app-ue .segh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.app-ue .segh .st{font-family:var(--font-num);font-weight:700;color:var(--accent-strong)}
+.app-ue .segh .lv{font-family:var(--font-num);font-weight:700;font-size:16px}
+.app-ue .segh .lv small{font-size:12px;color:var(--muted);font-weight:500}
+.app-ue .segh .cap{font-size:11px;font-weight:700;border:1px solid var(--loss);color:var(--loss);border-radius:4px;padding:0 5px}
+.app-ue .segh .need{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.app-ue .segh .need b{font-family:var(--font-num);color:var(--ink);font-size:14px}
+.app-ue .items{list-style:none;margin:0;padding:4px 12px}
+.app-ue .items li{display:grid;grid-template-columns:minmax(0,1fr) auto 72px;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+.app-ue .items li:last-child{border-bottom:0}
+.app-ue .items .nm{min-width:0;font-weight:500}
+.app-ue .items em{font-style:normal;font-size:10.5px;font-weight:700;margin-left:6px;padding:0 5px;border-radius:4px;white-space:nowrap}
+.app-ue .items em.b{background:var(--bonus-soft);color:var(--bonus)}
+.app-ue .items em.nb{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.app-ue .items .ct{font-family:var(--font-num);font-weight:700;font-size:17px}
+.app-ue .items .ex{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;color:var(--muted);font-size:13px}
+.app-ue .segf{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:13px;border-top:1px solid var(--line)}
+.app-ue .segf .num{font-weight:700}
+.app-ue .t-ok{color:var(--bonus);font-weight:700}
+.app-ue .t-loss{color:var(--loss);font-weight:700}
+.app-ue .t-carry{color:var(--carry);font-weight:700}
+.app-ue .msg{margin:0;padding:12px;border-radius:8px;background:var(--surface-2);font-size:14px}
+.app-ue .msg.err{background:var(--loss-soft)}
+.app-ue details.ref{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.app-ue details.ref>summary{cursor:pointer;padding:14px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.app-ue details.ref>summary::-webkit-details-marker{display:none}
+.app-ue details.ref>summary::after{content:"＋";color:var(--accent-strong)}
+.app-ue details.ref[open]>summary::after{content:"－"}
+.app-ue .refbody{padding:0 16px 16px;display:grid;gap:16px}
+.app-ue .refbody h3{margin:0 0 6px;font-size:14px}
+.app-ue .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.app-ue .tbl th,.app-ue .tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.app-ue .tbl td.r,.app-ue .tbl th.r{text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.app-ue .tbl th{font-size:12px;color:var(--muted)}
+.app-ue .scroll{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.app-ue .scroll .tbl thead th{position:sticky;top:0;background:var(--surface)}
+.app-ue .caps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.app-ue .src{font-size:12px;color:var(--muted);margin:0}
+.app-ue .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--bar);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.app-ue .bar-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.app-ue .bar .bv{display:grid;line-height:1.25;min-width:0}
+.app-ue .bar .bv b{font-family:var(--font-num);font-size:20px}
+.app-ue .bar .bv span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-ue .bar button{margin-left:auto;flex:none;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:8px;padding:9px 14px;cursor:pointer}
+.app-rp .wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 128px;display:grid;gap:14px}
+.app-rp .num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.app-rp .head{position:relative;display:grid;gap:6px;padding-block:6px 4px;overflow:hidden}
+.app-rp .head::after{content:"";position:absolute;inset:0 0 0 auto;width:42%;background:repeating-linear-gradient(-62deg,var(--stripe) 0 2px,transparent 2px 12px);pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 60%);mask-image:linear-gradient(90deg,transparent,#000 60%)}
+.app-rp .eyebrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.app-rp .tag{display:inline-block;transform:skewX(-14deg);background:var(--accent);color:var(--accent-ink);padding:2px 12px;font-weight:700;font-size:12.5px;letter-spacing:.06em}
+.app-rp .tag>span{display:inline-block;transform:skewX(14deg)}
+.app-rp .en{font-family:var(--font-num);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.app-rp h1{margin:0;font-size:clamp(26px,6vw,34px);font-weight:900;letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+.app-rp .lead{margin:0;color:var(--muted);font-size:14px;max-width:60ch}
+.app-rp .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:14px;min-width:0}
+.app-rp .card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.app-rp .card-h h2{margin:0;font-size:17px;font-weight:700;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.app-rp .field{display:grid;gap:6px;min-width:0;align-content:start}
+.app-rp .lbl{font-size:13px;font-weight:700;color:var(--muted)}
+.app-rp .hint{font-size:12.5px;color:var(--muted)}
+.app-rp .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.app-rp input.n{width:100%;min-width:0;height:42px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:17px;font-weight:600;text-align:right;-moz-appearance:textfield;appearance:textfield}
+.app-rp input.n::-webkit-inner-spin-button,.app-rp input.n::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.app-rp input.n:disabled{opacity:.5}
+.app-rp input.n.bad{border-color:var(--loss);background:var(--loss-soft)}
+.app-rp input.n::placeholder{color:var(--muted);font-weight:500;font-size:14px;font-family:var(--font-ui)}
+.app-rp .quick{display:flex;flex-wrap:wrap;gap:6px}
+.app-rp .quick button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 12px;font-size:12.5px;cursor:pointer;font-family:var(--font-num);font-weight:600}
+.app-rp .quick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong)}
+.app-rp .ghost{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer}
+.app-rp .sample{background:var(--accent-soft);border-radius:8px;padding:8px 10px;font-size:13px}
+.app-rp .sw{display:inline-block;width:14px;height:18px;border-radius:3px;flex:none;position:relative;vertical-align:-3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.app-rp .sw::after{content:"";position:absolute;left:3px;right:3px;top:5px;height:2px;border-radius:1px;background:rgba(255,255,255,.75);box-shadow:0 4px 0 rgba(255,255,255,.75)}
+.app-rp .sw.w{background:var(--rw);box-shadow:inset 0 0 0 1px var(--rw-edge)}
+.app-rp .sw.w::after{background:var(--rw-edge);box-shadow:0 4px 0 var(--rw-edge)}
+.app-rp .sw.b{background:var(--rb)}
+.app-rp .sw.y{background:var(--ry)}
+.app-rp .sw.p{background:var(--rp)}
+.app-rp .inv{display:grid;gap:8px}
+.app-rp .ir{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:10px;align-items:center}
+.app-rp .ir .nm{display:flex;align-items:center;gap:10px;min-width:0}
+.app-rp .ir .nm b{font-weight:700}
+.app-rp .ir .nm small{display:block;font-size:12px;color:var(--muted);font-family:var(--font-num)}
+.app-rp .capline{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:10px;align-items:center;background:var(--rp-soft);border-radius:8px;padding:8px 10px}
+.app-rp .capline .t{font-size:13.5px;font-weight:700}
+.app-rp .capline .t small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.app-rp .capline input.n{height:38px;background:var(--surface)}
+.app-rp .seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--line)}
+.app-rp .seg button{min-width:0;border:0;background:var(--surface-2);padding:10px 6px;cursor:pointer;font-weight:700;font-size:14.5px;line-height:1.3}
+.app-rp .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.app-rp .seg button small{display:block;font-weight:500;font-size:11px;opacity:.9;margin-top:2px}
+.app-rp #rp-result{scroll-margin-top:72px}
+.app-rp .big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.app-rp .big .k{font-weight:700;color:var(--muted);font-size:14px}
+.app-rp .big .v{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:clamp(40px,11vw,56px);font-weight:700;line-height:1}
+.app-rp .big .u{font-weight:700;color:var(--muted)}
+.app-rp .pill{display:inline-block;transform:skewX(-12deg);padding:2px 10px;font-size:12.5px;font-weight:700;align-self:center}
+.app-rp .pill>span{display:inline-block;transform:skewX(12deg)}
+.app-rp .pill.mode{background:var(--accent-soft);color:var(--accent-strong)}
+.app-rp .pill.manual{background:var(--rp-soft);color:var(--ink)}
+.app-rp .use{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.app-rp .ut{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:2px;min-width:0}
+.app-rp .ut .h{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.app-rp .ut .c{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;line-height:1.15}
+.app-rp .ut .c small{font-size:13px;color:var(--muted);font-weight:600}
+.app-rp .ut .l{font-size:11.5px;color:var(--muted);font-family:var(--font-num)}
+.app-rp .ut.zero .c{color:var(--muted)}
+.app-rp .ut.p{border-color:color-mix(in srgb,var(--rp) 45%,var(--line));background:var(--rp-soft)}
+.app-rp .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.app-rp .meta div{background:var(--surface-2);border-radius:8px;padding:8px 10px;min-width:0}
+.app-rp .meta dt{font-size:12px;color:var(--muted);font-weight:700}
+.app-rp .meta dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-size:19px;font-weight:700}
+.app-rp .meta dd small{font-size:12px;font-weight:500;color:var(--muted);font-family:var(--font-ui)}
+.app-rp .t-ok{color:var(--ok)}
+.app-rp .t-loss{color:var(--loss)}
+.app-rp .t-carry{color:var(--carry)}
+.app-rp .sub{margin:0;font-size:14.5px;font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.app-rp .sub .en{font-size:10.5px}
+.app-rp .cmp{width:100%;border-collapse:collapse;font-size:14px}
+.app-rp .cmp th{font-size:12px;color:var(--muted);font-weight:700;text-align:right;padding:4px 8px;border-bottom:1px solid var(--line)}
+.app-rp .cmp th:first-child{text-align:left}
+.app-rp .cmp td{padding:0;border-bottom:1px solid var(--line)}
+.app-rp .cmp td button{all:unset;box-sizing:border-box;display:block;width:100%;padding:9px 8px;cursor:pointer;text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums;font-weight:600}
+.app-rp .cmp td:first-child button{text-align:left;font-family:var(--font-ui);font-weight:700}
+.app-rp .cmp td:first-child button small{display:block;font-size:11.5px;font-weight:500;color:var(--muted)}
+.app-rp .cmp tr:hover td{background:var(--surface-2)}
+.app-rp .cmp tr.on td{background:var(--accent-soft)}
+.app-rp .cmp tr.on td:first-child button{color:var(--accent-strong)}
+.app-rp .cmp button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.app-rp .chartwrap{position:relative;min-width:0}
+.app-rp #rp-chart{display:block;width:100%;height:220px;touch-action:none}
+.app-rp #rp-chart text{font-family:var(--font-num);font-size:11px;fill:var(--muted)}
+.app-rp #rp-chart .ann{font-family:var(--font-ui);font-weight:700;font-size:11.5px;fill:var(--ink)}
+.app-rp .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap;z-index:2}
+.app-rp .tip b{font-family:var(--font-num)}
+.app-rp .tip .mix{display:flex;gap:8px;font-family:var(--font-num);color:var(--muted)}
+.app-rp .slider{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+.app-rp .slider .lbl{white-space:nowrap}
+.app-rp .slider input[type=range]{width:100%;accent-color:var(--rp)}
+.app-rp .slider output{font-family:var(--font-num);font-weight:700;font-size:16px;min-width:56px;text-align:right}
+.app-rp .back{justify-self:start}
+.app-rp .msg{margin:0;padding:12px;border-radius:8px;background:var(--surface-2);font-size:14px}
+.app-rp .msg.err{background:var(--loss-soft)}
+.app-rp details.ref{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.app-rp details.ref>summary{cursor:pointer;padding:14px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.app-rp details.ref>summary::-webkit-details-marker{display:none}
+.app-rp details.ref>summary::after{content:"＋";color:var(--accent-strong)}
+.app-rp details.ref[open]>summary::after{content:"－"}
+.app-rp .refbody{padding:0 16px 16px;display:grid;gap:16px}
+.app-rp .refbody h3{margin:0 0 6px;font-size:14px}
+.app-rp .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.app-rp .tbl th,.app-rp .tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.app-rp .tbl td.r,.app-rp .tbl th.r{text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.app-rp .tbl th{font-size:12px;color:var(--muted)}
+.app-rp .scroll{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.app-rp .scroll .tbl thead th{position:sticky;top:0;background:var(--surface)}
+.app-rp .tbl tr.on td{background:var(--accent-soft)}
+.app-rp .src{font-size:12px;color:var(--muted);margin:0}
+.app-rp .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--bar);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.app-rp .bar-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.app-rp .bar .bv{display:grid;line-height:1.3;min-width:0}
+.app-rp .bar .mix{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--font-num);font-weight:700;font-size:15px}
+.app-rp .bar .mix span{display:inline-flex;align-items:center;gap:4px}
+.app-rp .bar .mix .sw{width:10px;height:13px;vertical-align:0}
+.app-rp .bar .mix .sw::after{display:none}
+.app-rp .bar .s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-rp .bar button{margin-left:auto;flex:none;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:8px;padding:9px 14px;cursor:pointer}
+@media (max-width:460px){
+  .app-rp .seg{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-rp .use{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-rp .ir,.app-rp .capline{grid-template-columns:minmax(0,1fr) 112px}
+}
+
+</style>
+
+<nav class="apptabs" aria-label="計算機の切り替え">
+  <div class="apptabs-in">
+    <span class="brand"><span>育成計算機</span></span>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-ue" data-app="ue" aria-controls="app-ue" aria-selected="true">固有武器</button>
+      <button type="button" role="tab" id="tab-rp" data-app="rp" aria-controls="app-rp" aria-selected="false">レポート</button>
+    </div>
+  </div>
+</nav>
+
+<div class="app-ue" id="app-ue" role="tabpanel" aria-labelledby="tab-ue">
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow"><span class="tag"><span>固有武器</span></span><span class="en">Unique weapon · EXP</span></div>
+    <h1>端数計算機</h1>
+    <p class="lead">手持ちの強化素材から、端数（使いすぎたEXP）がいちばん少ない組み合わせを出します。★ごとのレベル上限で消えるEXPも計算に入れます。</p>
+  </header>
+
+  <section class="card" aria-labelledby="ue-h-weapon">
+    <div class="card-h"><h2 id="ue-h-weapon">武器と目標 <span class="en">Weapon / Target</span></h2></div>
+    <div class="field">
+      <span class="lbl">武器種</span>
+      <div class="chips" id="ue-chips"></div>
+      <div class="bonusline" id="ue-bonusline"></div>
+    </div>
+    <div class="field">
+      <span class="lbl">いまの固有武器の★</span>
+      <div class="seg" id="ue-starSeg"></div>
+    </div>
+    <div class="row2">
+      <label class="field"><span class="lbl">いまのLv</span><input class="n" id="ue-lv" type="number" inputmode="numeric" min="1" step="1"></label>
+      <label class="field"><span class="lbl">たまっているEXP</span><input class="n" id="ue-exp" type="number" inputmode="numeric" min="0" step="5"><span class="hint" id="ue-expHint"></span></label>
+    </div>
+    <div class="field">
+      <label class="field"><span class="lbl">目標Lv</span><input class="n" id="ue-target" type="number" inputmode="numeric" min="1" step="1"></label>
+      <div class="quick" id="ue-quick"></div>
+    </div>
+    <div class="field">
+      <span class="lbl">限界解放のタイミング</span>
+      <div class="seg" id="ue-planSeg">
+        <button type="button" data-v="step">上限ごとに強化<small>上限で余りが消える</small></button>
+        <button type="button" data-v="first">先に限界解放<small>一気に目標まで</small></button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">素材の使い方</span>
+      <div class="seg" id="ue-prefSeg">
+        <button type="button" data-v="few">少ない個数で<small>チタンから使う</small></button>
+        <button type="button" data-v="keep">上位素材を温存<small>錆びた・普通のから使う</small></button>
+        <button type="button" data-v="even">均等<small>普通〜チタンを同じくらいに</small></button>
+      </div>
+      <span class="hint" id="ue-prefHint"></span>
+      <label class="toggle"><input type="checkbox" id="ue-useNB"> ボーナスなしの素材も使う</label>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="ue-h-inv">
+    <div class="card-h"><h2 id="ue-h-inv">手持ち素材 <span class="en">Inventory</span></h2><button type="button" class="ghost" id="ue-zero">すべて0にする</button></div>
+    <div class="sample" id="ue-sample" hidden><span>サンプルの数値が入っています。ゲームの所持数に書き換えてください。</span></div>
+    <div class="inv" id="ue-inv"></div>
+    <div class="capline">
+      <label class="t" for="ue-tcap">チタンは多くてもこの個数まで<small>空欄なら所持数まで使います。ボーナスが付くチタンから使います</small></label>
+      <input class="n" id="ue-tcap" type="number" inputmode="numeric" min="0" step="1" placeholder="制限なし">
+    </div>
+    <div class="invsum" id="ue-invsum"></div>
+  </section>
+
+  <section class="card" id="ue-result" aria-labelledby="ue-h-res" aria-live="polite">
+    <div class="card-h"><h2 id="ue-h-res">結果 <span class="en">Result</span></h2></div>
+    <div id="ue-resBody"></div>
+  </section>
+
+  <details class="ref" id="ue-ref">
+    <summary>参考データ（素材EXP・★ごとの上限・経験値テーブル）</summary>
+    <div class="refbody">
+      <div>
+        <h3>素材1個あたりのEXP</h3>
+        <table class="tbl">
+          <thead><tr><th>素材</th><th class="r">通常</th><th class="r">ボーナス（×1.5）</th></tr></thead>
+          <tbody>
+            <tr><td>錆びた〇〇</td><td class="r">10</td><td class="r">15</td></tr>
+            <tr><td>普通の〇〇</td><td class="r">50</td><td class="r">75</td></tr>
+            <tr><td>クロム〇〇</td><td class="r">200</td><td class="r">300</td></tr>
+            <tr><td>チタン〇〇</td><td class="r">1,000</td><td class="r">1,500</td></tr>
+          </tbody>
+        </table>
+        <p class="hint">クレジットはEXP1につき180かかります。</p>
+      </div>
+      <div>
+        <h3>ボーナスが付く武器種</h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td>スプリング</td><td>SMG・SG・HG・FT</td></tr>
+            <tr><td>ハンマー</td><td>AR・GL・RL</td></tr>
+            <tr><td>銃身</td><td>MG・SR・MT・RG</td></tr>
+            <tr><td>撃針</td><td>全武器種</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>★ごとのLv上限</h3>
+        <div class="caps" id="ue-caps"></div>
+        <p class="hint">固有武器のLvはいまのところ★4の60までです。上限が変わったときは、ここを書き換えると計算に反映されます。</p>
+      </div>
+      <div>
+        <h3>経験値テーブル</h3>
+        <div class="scroll"><table class="tbl" id="ue-expTable"><thead><tr><th class="r">Lv</th><th class="r">次のLvまで</th><th class="r">Lv1からの累計</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <p class="src">出典: <a href="https://bluearchive.wikiru.jp/?%E7%B5%8C%E9%A8%93%E5%80%A4%E8%A1%A8" target="_blank" rel="noopener">ブルアカ攻略有志Wiki 経験値表</a>（Lv1–60・素材EXP・ボーナス対象・クレジット）、<a href="https://game8.jp/blue-archive/687342" target="_blank" rel="noopener">Game8 経験値テーブル</a>（Lv1–50の照合）</p>
+    </div>
+  </details>
+</div>
+
+<div class="bar" role="status">
+  <div class="bar-in">
+    <div class="bv"><b id="ue-barV">—</b><span id="ue-barS">計算中</span></div>
+    <button type="button" id="ue-toRes">結果を見る</button>
+  </div>
+</div>
+</div>
+
+<div class="app-rp" id="app-rp" role="tabpanel" aria-labelledby="tab-rp" hidden>
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow"><span class="tag"><span>生徒レベル</span></span><span class="en">Activity report · EXP</span></div>
+    <h1>レポート配分計算機</h1>
+    <p class="lead">いまのLvから目標Lvまでに必要なEXPを出して、紫（最上級）を使いすぎず、白や青を連打しすぎない組み合わせを選びます。</p>
+  </header>
+
+  <section class="card" aria-labelledby="rp-h-lv">
+    <div class="card-h"><h2 id="rp-h-lv">レベル <span class="en">Level</span></h2></div>
+    <div class="row2">
+      <label class="field"><span class="lbl">いまのLv</span><input class="n" id="rp-lv" type="number" inputmode="numeric" min="1" max="89" step="1"></label>
+      <label class="field"><span class="lbl">たまっているEXP</span><input class="n" id="rp-exp" type="number" inputmode="numeric" min="0" step="1"><span class="hint" id="rp-expHint"></span></label>
+    </div>
+    <div class="row2">
+      <label class="field"><span class="lbl">目標Lv</span><input class="n" id="rp-target" type="number" inputmode="numeric" min="2" max="90" step="1"></label>
+      <label class="field"><span class="lbl">先生Lv（生徒Lvの上限）</span><input class="n" id="rp-teacher" type="number" inputmode="numeric" min="1" max="90" step="1"></label>
+    </div>
+    <div class="quick" id="rp-quick"></div>
+    <div class="hint" id="rp-needLine"></div>
+  </section>
+
+  <section class="card" aria-labelledby="rp-h-inv">
+    <div class="card-h"><h2 id="rp-h-inv">手持ちレポート <span class="en">Inventory</span></h2><button type="button" class="ghost" id="rp-zero">すべて0にする</button></div>
+    <div class="sample" id="rp-sample" hidden>サンプルの数値が入っています。ゲームの所持数に書き換えてください。</div>
+    <div class="inv" id="rp-inv"></div>
+    <div class="capline">
+      <label class="t" for="rp-pcap">紫は多くてもこの枚数まで<small>空欄なら所持数まで使います</small></label>
+      <input class="n" id="rp-pcap" type="number" inputmode="numeric" min="0" step="1" placeholder="制限なし">
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="rp-h-mode">
+    <div class="card-h"><h2 id="rp-h-mode">使い方の方針 <span class="en">Plan style</span></h2></div>
+    <div class="seg" id="rp-modeSeg">
+      <button type="button" data-v="fast">時短<small>枚数を最少に</small></button>
+      <button type="button" data-v="bal">バランス<small>黄で代われる分は紫を使わない</small></button>
+      <button type="button" data-v="save">紫温存<small>青を使ってでも紫を減らす</small></button>
+      <button type="button" data-v="even">均等<small>青・黄・紫を同じくらいの枚数に</small></button>
+    </div>
+  </section>
+
+  <section class="card" id="rp-result" aria-labelledby="rp-h-res">
+    <div class="card-h"><h2 id="rp-h-res">結果 <span class="en">Result</span></h2></div>
+    <div id="rp-resBody" aria-live="polite"></div>
+    <div id="rp-tradeoff" hidden>
+      <div style="display:grid;gap:10px">
+        <p class="sub">紫の枚数と、使う枚数の関係 <span class="en">Trade-off</span></p>
+        <p class="hint" style="margin:0">紫を1枚減らすと、ほかのレポートが何枚増えるかを表しています。点をタップするか、下のスライダーで紫の枚数を自分で決められます。</p>
+        <div class="chartwrap" id="rp-chartwrap">
+          <svg id="rp-chart" role="img" aria-label="紫の枚数ごとの、使うレポートの合計枚数"></svg>
+          <div class="tip" id="rp-tip" hidden></div>
+        </div>
+        <p class="hint" style="margin:-4px 0 0">横軸は紫の枚数、縦軸は使うレポートの合計枚数です。</p>
+        <div class="slider">
+          <label class="lbl" for="rp-pSlider"><span class="sw p"></span> 紫</label>
+          <input type="range" id="rp-pSlider" min="0" max="0" step="1" value="0">
+          <output id="rp-pOut" for="rp-pSlider">0枚</output>
+        </div>
+        <button type="button" class="ghost back" id="rp-backRec" hidden>おすすめに戻す</button>
+      </div>
+    </div>
+  </section>
+
+  <details class="ref">
+    <summary>参考データ（レポートのEXP・紫の枚数ごとの一覧・経験値テーブル）</summary>
+    <div class="refbody">
+      <div>
+        <h3>レポート1枚あたり</h3>
+        <table class="tbl">
+          <thead><tr><th>レポート</th><th class="r">EXP</th><th class="r">クレジット</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sw w"></span> 初級（白）</td><td class="r">50</td><td class="r">350</td></tr>
+            <tr><td><span class="sw b"></span> 中級（青）</td><td class="r">500</td><td class="r">3,500</td></tr>
+            <tr><td><span class="sw y"></span> 上級（黄）</td><td class="r">2,000</td><td class="r">14,000</td></tr>
+            <tr><td><span class="sw p"></span> 最上級（紫）</td><td class="r">10,000</td><td class="r">70,000</td></tr>
+          </tbody>
+        </table>
+        <p class="hint">クレジットはEXP1につき7。紫1枚は黄5枚・青20枚・白200枚と同じEXPです。</p>
+      </div>
+      <div>
+        <h3>紫の枚数ごとの組み合わせ</h3>
+        <div class="scroll"><table class="tbl" id="rp-frontTable"><thead><tr><th class="r">紫</th><th class="r">黄</th><th class="r">青</th><th class="r">白</th><th class="r">合計枚数</th><th class="r">端数</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div>
+        <h3>生徒の経験値テーブル</h3>
+        <div class="scroll"><table class="tbl" id="rp-expTable"><thead><tr><th class="r">Lv</th><th class="r">次のLvまで</th><th class="r">Lv1からの累計</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <p class="hint" style="margin:0">この表は、ブルアカ攻略有志Wiki（wikiru）の「日本版実機で確認できたもの」とLv1〜90の全行で一致しています。Lv77〜83で次のLvまでの必要EXPが39,385のまま続くのも、実機どおりです。</p>
+      <p class="src">出典: <a href="https://game8.jp/blue-archive/687342" target="_blank" rel="noopener">Game8 経験値テーブル</a>（Lv1–90・レポートのEXP）、<a href="https://bluearchive.wikiru.jp/?%E7%B5%8C%E9%A8%93%E5%80%A4%E8%A1%A8" target="_blank" rel="noopener">ブルアカ攻略有志Wiki 経験値表</a>（実機確認の照合）、<a href="https://game8.jp/blue-archive/639839" target="_blank" rel="noopener">Game8 生徒レベルの上げ方</a>（クレジット・上限）</p>
+    </div>
+  </details>
+</div>
+
+<div class="bar" role="status">
+  <div class="bar-in">
+    <div class="bv"><div class="mix" id="rp-barMix">—</div><span class="s" id="rp-barS">計算中</span></div>
+    <button type="button" id="rp-toRes">結果を見る</button>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  const KEY='ba-app-tab';
+  const panes={ue:document.getElementById('app-ue'),rp:document.getElementById('app-rp')};
+  const btns=[...document.querySelectorAll('.apptabs [data-app]')];
+  const pos={ue:0,rp:0};
+  let cur=null;
+  function show(t,remember){
+    if(cur===t){window.scrollTo(0,0);return;}
+    if(cur)pos[cur]=window.scrollY;
+    for(const k in panes)panes[k].hidden=k!==t;
+    btns.forEach(b=>b.setAttribute('aria-selected',String(b.dataset.app===t)));
+    cur=t;
+    if(remember){try{localStorage.setItem(KEY,t);}catch(e){}}
+    window.scrollTo(0,pos[t]||0);
+  }
+  btns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.app,true)));
+  let first='ue';
+  const h=(location.hash||'').slice(1);
+  if(h==='report'||h==='rp')first='rp';
+  else if(h==='ue'||h==='weapon')first='ue';
+  else{try{const s=localStorage.getItem(KEY);if(s==='ue'||s==='rp')first=s;}catch(e){}}
+  show(first,false);
+})();
+</script>
+<script>
+(function(){
+/*SOLVER-START*/
+// Lv → Lv1からの累計EXP（index = Lv）
+const TOTAL=[0,0,25,55,90,130,175,225,280,340,405,475,555,645,745,855,975,1105,1245,1395,1555,1725,1915,2125,2355,2605,2875,3185,3535,3925,4355,4825,5355,5945,6595,7305,8075,8905,9795,10745,11755,12825,13980,15220,16545,17955,19450,21030,22695,24445,26280,28200,30205,32295,34470,36730,39075,41535,44110,46800,49605];
+const MAXLV=60;
+const TYPES=[{id:'spring',name:'スプリング'},{id:'hammer',name:'ハンマー'},{id:'barrel',name:'銃身'},{id:'pin',name:'撃針'}];
+const TIERS=[{pre:'錆びた',base:10},{pre:'普通の',base:50},{pre:'クロム',base:200},{pre:'チタン',base:1000}];
+const PIN=3;
+const TW=[1,1e4,1e8,1e12];
+const itemName=(t,r)=>TIERS[r].pre+TYPES[t].name;
+
+function lexLess(a,b){for(let i=0;i<a.length;i++){if(a[i]<b[i])return true;if(a[i]>b[i])return false;}return false;}
+
+// 手持ち → EXP値ごとのカテゴリ（同じEXPの素材はまとめて扱う）
+function buildCats(inv,bonus,useNB){
+  const map=new Map();
+  for(let t=0;t<4;t++)for(let r=0;r<4;r++){
+    const cnt=inv[t][r]|0; if(cnt<=0)continue;
+    const b=!!bonus[t]; if(!b&&!useNB)continue;
+    const key=r+(b?'B':'N');
+    let c=map.get(key);
+    if(!c){c={key,tier:r,bonus:b,units:(b?TIERS[r].base*1.5:TIERS[r].base)/5,count:0};map.set(key,c);}
+    c.count+=cnt;
+  }
+  return [...map.values()];
+}
+
+function costOf(c,m,pref){
+  const nb=c.bonus?0:m*c.units;
+  return pref==='keep'?[nb,m*TW[c.tier],m]:[m,nb,0];
+}
+
+// needExp 以上で、超過がいちばん小さい組み合わせ（有限個ナップサック）
+function solveBin(needExp,cats,pref){
+  if(needExp<=0)return{ok:true,use:{},sum:0,over:0};
+  const need=Math.ceil(needExp/5);
+  const act=cats.filter(c=>c.count>0);
+  let total=0;for(const c of act)total+=c.units*c.count;
+  if(total<need)return{ok:false,avail:total*5,short:needExp-total*5};
+  let maxU=0;for(const c of act)if(c.units>maxU)maxU=c.units;
+  const top=need+maxU-1, N=top+1;
+  const items=[];
+  for(const c of act){let left=c.count,k=1;while(left>0){const m=Math.min(k,left);if(m*c.units<=top)items.push({key:c.key,m,w:m*c.units,cost:costOf(c,m,pref)});left-=m;k*=2;}}
+  const A=new Float64Array(N).fill(Infinity),B=new Float64Array(N),C=new Float64Array(N);
+  A[0]=0;
+  const takes=[];
+  for(const it of items){
+    const tk=new Uint8Array(N),w=it.w,a=it.cost[0],b=it.cost[1],d=it.cost[2];
+    for(let s=top;s>=w;s--){
+      const p=s-w; if(A[p]===Infinity)continue;
+      const na=A[p]+a,nb=B[p]+b,nd=C[p]+d;
+      if(na<A[s]||(na===A[s]&&(nb<B[s]||(nb===B[s]&&nd<C[s])))){A[s]=na;B[s]=nb;C[s]=nd;tk[s]=1;}
+    }
+    takes.push(tk);
+  }
+  let best=-1;for(let s=need;s<=top;s++)if(A[s]!==Infinity){best=s;break;}
+  if(best<0)return{ok:false,avail:total*5,short:0};
+  const use={};let s=best;
+  for(let k=items.length-1;k>=0;k--){if(takes[k][s]){use[items[k].key]=(use[items[k].key]||0)+items[k].m;s-=items[k].w;}}
+  return{ok:true,use,sum:best*5,over:best*5-needExp};
+}
+
+// カテゴリの使用数を実際の素材に割り当て（ボーナス素材は専用→撃針の順）
+function allocate(use,inv,bonus){
+  const lines=[];
+  for(const key in use){
+    let n=use[key]; if(!n)continue;
+    const r=+key[0], b=key[1]==='B';
+    const cand=[0,1,2,3].filter(t=>!!bonus[t]===b&&inv[t][r]>0);
+    if(b)cand.sort((x,y)=>((x===PIN)-(y===PIN))||(inv[y][r]-inv[x][r]));
+    else cand.sort((x,y)=>inv[y][r]-inv[x][r]);
+    for(const t of cand){if(!n)break;const k=Math.min(n,inv[t][r]);inv[t][r]-=k;n-=k;lines.push({t,r,n:k,each:b?TIERS[r].base*1.5:TIERS[r].base,bonus:b});}
+  }
+  lines.sort((x,y)=>(y.each-x.each)||(x.t-y.t));
+  return lines;
+}
+
+// 区間（上限で区切る）を作る
+function buildSegments(st,plan){
+  const caps=st.caps;
+  let needStar=st.star;
+  while(needStar<=4&&caps[needStar-1]<st.target)needStar++;
+  if(needStar>4)return{error:'目標Lvが★4の上限（Lv'+caps[3]+'）を超えています。'};
+  const segs=[];
+  const mk=(star,from,fromExp,to,lb)=>({star,from,fromExp,to,cap:caps[star-1],isCap:to===caps[star-1],need:TOTAL[to]-TOTAL[from]-fromExp,lbBefore:lb});
+  if(plan==='first'||needStar===st.star){
+    const lb=[];for(let s=st.star+1;s<=needStar;s++)lb.push(s);
+    const sg=mk(needStar,st.lv,st.exp,st.target,lb); if(sg.need>0)segs.push(sg);
+  }else{
+    let lv=st.lv,ex=st.exp,pend=[];
+    for(let s=st.star;s<=needStar;s++){
+      const to=s<needStar?caps[s-1]:st.target;
+      const sg=mk(s,lv,ex,to,pend);
+      if(sg.need>0){segs.push(sg);pend=[];}
+      if(s<needStar){pend=pend.concat([s+1]);lv=caps[s-1];ex=0;}
+    }
+  }
+  return{segs,needStar};
+}
+
+// 複数区間で手持ちを分け合う（区間の解き順を何通りか試して一番端数が少ないもの）
+function solvePlan(segs,st){
+  const needs=segs.map(s=>s.need), idx=segs.map((_,i)=>i);
+  const orders=[idx,[...idx].reverse(),[...idx].sort((a,b)=>needs[b]-needs[a]),[...idx].sort((a,b)=>needs[a]-needs[b])];
+  const seen=new Set(); let best=null;
+  for(const ord of orders){
+    const sig=ord.join(','); if(seen.has(sig))continue; seen.add(sig);
+    const inv=st.inv.map(a=>a.slice()); const res=[]; let ok=true,over=0,cnt=0,nbx=0,tier=0;
+    for(const i of ord){
+      const r=solveBin(needs[i],buildCats(inv,st.bonus,st.useNB),st.pref);
+      if(!r.ok){ok=false;break;}
+      r.lines=allocate(r.use,inv,st.bonus); res[i]=r; over+=r.over;
+      for(const l of r.lines){cnt+=l.n;if(!l.bonus)nbx+=l.n*l.each;tier+=l.n*TW[l.r];}
+    }
+    if(!ok)continue;
+    const key=st.pref==='keep'?[over,nbx,tier,cnt]:[over,cnt,nbx,tier];
+    if(!best||lexLess(key,best.key))best={key,res,over,cnt,left:inv};
+  }
+  return best;
+}
+
+// チタンの上限：ボーナスが付くチタン（専用→撃針）から使う分を残して、ほかは使わない
+function capTitanium(inv,bonus,cap){
+  const out=inv.map(a=>a.slice());
+  if(cap==null)return out;
+  let left=Math.max(0,cap);
+  const order=[0,1,2,3].filter(t=>bonus[t]&&t!==PIN).concat(bonus[PIN]?[PIN]:[]).concat([0,1,2,3].filter(t=>!bonus[t]));
+  for(const t of order){const k=Math.min(out[t][3],left);out[t][3]=k;left-=k;}
+  return out;
+}
+
+// 均等：普通・クロム・チタンの個数をそろえる（錆びたは端数調整の4個まで、同じ段階ならボーナス素材から）
+const RUSTY_MAX=4;
+function tierInfo(cats){
+  const T=[0,1,2,3].map(r=>({b:0,n:0,ub:TIERS[r].base*1.5/5,un:TIERS[r].base/5}));
+  for(const c of cats){if(c.bonus)T[c.tier].b+=c.count;else T[c.tier].n+=c.count;}
+  return T;
+}
+function tierUnits(t,k){const b=Math.min(k,t.b);return b*t.ub+(k-b)*t.un;}
+function nbLossUnits(T,n){let s=0;for(let r=0;r<4;r++)s+=Math.max(0,n[r]-T[r].b)*(T[r].ub-T[r].un);return s;}
+function solveEven(needExp,cats){
+  if(needExp<=0)return{ok:true,use:{},sum:0,over:0,fallback:false};
+  const need=Math.ceil(needExp/5);
+  const T=tierInfo(cats), tot=r=>T[r].b+T[r].n;
+  const r0max=Math.min(tot(0),RUSTY_MAX), f0=tierUnits(T[0],r0max);
+  const reach=M=>tierUnits(T[1],Math.min(tot(1),M))+tierUnits(T[2],Math.min(tot(2),M))+tierUnits(T[3],Math.min(tot(3),M))+f0;
+  const Mhi=Math.max(tot(1),tot(2),tot(3));
+  let counts=null,fallback=false;
+  if(reach(Mhi)<need){
+    const base=tierUnits(T[1],tot(1))+tierUnits(T[2],tot(2))+tierUnits(T[3],tot(3));
+    let k0=0;while(k0<tot(0)&&base+tierUnits(T[0],k0)<need)k0++;
+    if(base+tierUnits(T[0],k0)<need)return{ok:false};
+    counts=[k0,tot(1),tot(2),tot(3)];fallback=true;
+  }else{
+    let lo=0,hi=Mhi;while(lo<hi){const mid=(lo+hi)>>1;if(reach(mid)>=need)hi=mid;else lo=mid+1;}
+    const M=lo,m=[r0max,Math.min(tot(1),M),Math.min(tot(2),M),Math.min(tot(3),M)];
+    const u1max=tierUnits(T[1],m[1]);
+    let bk=null;
+    for(let n3=m[3];n3>=0;n3--){
+      const u3=tierUnits(T[3],n3);
+      if(u3+tierUnits(T[2],m[2])+u1max+f0<need)break;
+      for(let n2=m[2];n2>=0;n2--){
+        const u2=tierUnits(T[2],n2), R=need-u3-u2;
+        if(R>u1max+f0)break;
+        let a=0,b=m[1];while(a<b){const mid=(a+b)>>1;if(tierUnits(T[1],mid)+f0>=R)b=mid;else a=mid+1;}
+        for(let n1=a;n1<=Math.min(m[1],a+2);n1++){
+          const R1=R-tierUnits(T[1],n1);
+          let n0=0;while(n0<r0max&&tierUnits(T[0],n0)<R1)n0++;
+          if(tierUnits(T[0],n0)<R1)continue;
+          const n=[n0,n1,n2,n3];
+          const over=u3+u2+tierUnits(T[1],n1)+tierUnits(T[0],n0)-need;
+          const k=[over,-(n1+n2+n3),n0,nbLossUnits(T,n),n3];
+          if(!bk||lexLess(k,bk)){bk=k;counts=n;}
+        }
+      }
+    }
+    if(!counts)return{ok:false};
+  }
+  const use={};let units=0;
+  for(let r=0;r<4;r++){
+    const n=counts[r];if(!n)continue;
+    const b=Math.min(n,T[r].b);
+    if(b)use[r+'B']=b;
+    if(n-b)use[r+'N']=n-b;
+    units+=tierUnits(T[r],n);
+  }
+  return{ok:true,use,sum:units*5,over:units*5-needExp,fallback,counts};
+}
+function solvePlanEven(segs,st){
+  const inv=st.inv.map(a=>a.slice());const res=[];let over=0,cnt=0,fallback=false;
+  for(let i=0;i<segs.length;i++){
+    const r=solveEven(segs[i].need,buildCats(inv,st.bonus,st.useNB));
+    if(!r.ok)return null;
+    r.lines=allocate(r.use,inv,st.bonus);res[i]=r;over+=r.over;if(r.fallback)fallback=true;
+    for(const l of r.lines)cnt+=l.n;
+  }
+  return{res,over,cnt,left:inv,fallback};
+}
+
+function availExp(st){return buildCats(st.inv,st.bonus,st.useNB).reduce((a,c)=>a+c.units*5*c.count,0);}
+
+// 上限を超えた分（消える）と、次のLvへ持ち越す分
+function splitOver(sg,over){
+  const lost=Math.max(0,TOTAL[sg.to]+over-TOTAL[sg.cap]);
+  const carry=over-lost;
+  let L=sg.to;while(L<sg.cap&&TOTAL[L+1]<=TOTAL[sg.to]+carry)L++;
+  return{lost,carry,lvAfter:L};
+}
+
+function reachEstimate(segs,avail){
+  let rem=avail;
+  for(const sg of segs){
+    if(rem>=sg.need){rem-=sg.need;continue;}
+    const base=TOTAL[sg.from]+sg.fromExp+rem; let L=sg.from;
+    while(L<sg.to&&TOTAL[L+1]<=base)L++;
+    return{lv:L,star:sg.star};
+  }
+  const last=segs[segs.length-1];return{lv:last.to,star:last.star};
+}
+/*SOLVER-END*/
+
+(function(){
+  const $=s=>document.querySelector(s);
+  const fmt=n=>Math.round(n).toLocaleString('ja-JP');
+  const KEY='ue-hasu-calc-v1';
+  const CREDIT_PER_EXP=180;
+  const WEAPONS=[['SMG','サブマシンガン',0],['SG','ショットガン',0],['HG','ハンドガン',0],['AR','アサルトライフル',1],['GL','グレネードランチャー',1],['MG','マシンガン',2],['SR','スナイパーライフル',2],['MT','迫撃砲',2],['RG','レールガン',2],['RL','ロケットランチャー',1],['FT','火炎放射器',0]];
+  const DEFAULT={weapon:'AR',bonus:[false,true,false,true],inv:[[24,12,8,3],[30,9,5,2],[18,14,6,4],[10,6,4,12]],star:2,lv:34,exp:0,target:50,plan:'step',pref:'few',useNB:true,caps:[30,40,50,60],tcap:null,sample:true};
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  const int=(v,d)=>{const n=parseInt(v,10);return Number.isFinite(n)?n:d;};
+
+  function sanitize(o){
+    const d=clone(DEFAULT); if(!o||typeof o!=='object')return d;
+    if(WEAPONS.some(w=>w[0]===o.weapon))d.weapon=o.weapon;
+    if(Array.isArray(o.bonus)&&o.bonus.length===4)d.bonus=o.bonus.map(Boolean);
+    if(Array.isArray(o.inv)&&o.inv.length===4&&o.inv.every(a=>Array.isArray(a)&&a.length===4))d.inv=o.inv.map(a=>a.map(v=>Math.max(0,int(v,0))));
+    for(const k of['star','lv','exp','target'])if(o[k]!=null)d[k]=int(o[k],d[k]);
+    if(o.plan==='step'||o.plan==='first')d.plan=o.plan;
+    if(o.pref==='few'||o.pref==='keep'||o.pref==='even')d.pref=o.pref;
+    d.tcap=o.tcap==null?null:Math.max(0,int(o.tcap,0));
+    if(typeof o.useNB==='boolean')d.useNB=o.useNB;
+    if(Array.isArray(o.caps)&&o.caps.length===4)d.caps=o.caps.map((v,i)=>int(v,d.caps[i]));
+    d.sample=!!o.sample;
+    return d;
+  }
+  function load(){try{const raw=localStorage.getItem(KEY);if(raw)return sanitize(JSON.parse(raw));}catch(e){}return clone(DEFAULT);}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  let st=load();
+
+  /* ---------- build static UI ---------- */
+  const chips=$('#ue-chips');
+  WEAPONS.forEach(([code,name])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=code;b.title=name;b.setAttribute('aria-label',name);b.dataset.v=code;chips.appendChild(b);});
+  const starSeg=$('#ue-starSeg');
+  for(let s=1;s<=4;s++){const b=document.createElement('button');b.type='button';b.dataset.v=s;starSeg.appendChild(b);}
+  const inv=$('#ue-inv');
+  function buildInv(){
+    let h='<div></div>';
+    TIERS.forEach(t=>{h+=`<div class="th">${t.pre}<span class="num">${t.base}/${t.base*1.5}</span></div>`;});
+    TYPES.forEach((ty,t)=>{
+      h+=`<div class="rh"><span class="tn">${ty.name}</span><button type="button" class="bt" data-t="${t}"></button></div>`;
+      TIERS.forEach((_,r)=>{h+=`<input class="n" type="number" inputmode="numeric" min="0" step="1" id="ue-inv-${t}-${r}" data-t="${t}" data-r="${r}" aria-label="${itemName(t,r)}の所持数">`;});
+    });
+    inv.innerHTML=h;
+  }
+  buildInv();
+  const capsBox=$('#ue-caps');
+  for(let s=1;s<=4;s++){capsBox.insertAdjacentHTML('beforeend',`<label class="field"><span class="lbl">★${s}</span><input class="n" type="number" inputmode="numeric" min="1" max="${MAXLV}" id="ue-cap-${s}" data-s="${s}"></label>`);}
+  (function(){let h='';for(let L=1;L<=MAXLV;L++){h+=`<tr><td class="r">${L}</td><td class="r">${L<MAXLV?fmt(TOTAL[L+1]-TOTAL[L]):'—'}</td><td class="r">${fmt(TOTAL[L])}</td></tr>`;}$('#ue-expTable tbody').innerHTML=h;})();
+
+  /* ---------- sync state → controls ---------- */
+  function paint(){
+    chips.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st.weapon)));
+    const bn=TYPES.filter((_,t)=>st.bonus[t]).map(t=>t.name);
+    $('#ue-bonusline').innerHTML=bn.length?`ボーナス素材: <b>${bn.join('・')}</b>`:'ボーナス素材: なし';
+    starSeg.querySelectorAll('button').forEach(b=>{const s=+b.dataset.v;b.innerHTML=`★${s}<small>上限Lv${st.caps[s-1]}</small>`;b.setAttribute('aria-pressed',String(s===st.star));});
+    setVal('#ue-lv',st.lv);setVal('#ue-exp',st.exp);setVal('#ue-target',st.target);
+    const atCap=st.lv>=st.caps[st.star-1];
+    $('#ue-exp').disabled=atCap||st.lv>=MAXLV;
+    const nxt=st.lv>=1&&st.lv<MAXLV?TOTAL[st.lv+1]-TOTAL[st.lv]:0;
+    $('#ue-expHint').textContent=atCap?'上限Lvなので0として扱います':(nxt?`次のLvまで ${fmt(nxt)}（0〜${fmt(nxt-5)}）`:'');
+    let q='';for(let s=1;s<=4;s++){const c=st.caps[s-1];q+=`<button type="button" data-lv="${c}" aria-pressed="${st.target===c}"><b>Lv${c}</b> ★${s}上限</button>`;}
+    $('#ue-quick').innerHTML=q;
+    $('#ue-planSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st.plan)));
+    $('#ue-prefSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st.pref)));
+    $('#ue-useNB').checked=st.useNB;
+    $('#ue-prefHint').textContent=st.pref==='even'?'均等は、端数をなるべく増やさずに、普通・クロム・チタンの個数をそろえます。錆びたは端数調整（4個まで）にだけ使います。細かい調整に使うぶん、普通が少なめになることがあります。':'どちらも端数がいちばん少ない組み合わせを選びます。端数が同じときの選び方が違います。';
+    setVal('#ue-tcap',st.tcap==null?'':st.tcap);
+    inv.querySelectorAll('.bt').forEach(b=>{const t=+b.dataset.t,on=!!st.bonus[t];b.setAttribute('aria-pressed',String(on));b.textContent=on?'ボーナス ×1.5':'通常';});
+    inv.querySelectorAll('input').forEach(i=>{const t=+i.dataset.t,r=+i.dataset.r;setVal(i,st.inv[t][r]);i.classList.toggle('isb',!!st.bonus[t]);});
+    for(let s=1;s<=4;s++)setVal('#ue-cap-'+s,st.caps[s-1]);
+    $('#ue-sample').hidden=!st.sample;
+  }
+  function setVal(sel,v){const el=typeof sel==='string'?$(sel):sel;if(document.activeElement!==el)el.value=v;}
+
+  /* ---------- validation ---------- */
+  function validate(){
+    const c=st.caps;
+    for(let i=0;i<4;i++){if(!(c[i]>=1&&c[i]<=MAXLV))return`★${i+1}の上限は1〜${MAXLV}で入れてください。`;if(i&&c[i]<c[i-1])return'★ごとの上限は★1→★4の順に同じか大きくしてください。';}
+    const cap=c[st.star-1];
+    if(!(st.lv>=1))return'いまのLvを入れてください。';
+    if(st.lv>cap)return`★${st.star}の上限はLv${cap}です。いまのLvか★を見直してください。`;
+    if(!(st.target>=1))return'目標Lvを入れてください。';
+    if(st.target>c[3])return`目標Lvが★4の上限（Lv${c[3]}）を超えています。`;
+    if(st.target<st.lv)return'目標Lvは、いまのLv以上にしてください。';
+    const nxt=st.lv<MAXLV?TOTAL[st.lv+1]-TOTAL[st.lv]:0;
+    if(st.lv<cap&&(st.exp<0||st.exp>=nxt))return`たまっているEXPは0〜${fmt(nxt-1)}で入れてください。`;
+    return null;
+  }
+
+  /* ---------- render ---------- */
+  const resBody=$('#ue-resBody');
+  function setBar(v,s){$('#ue-barV').textContent=v;$('#ue-barS').textContent=s;}
+  function itemsHTML(lines){return lines.map(l=>`<li><span class="nm">${itemName(l.t,l.r)}${l.bonus?'<em class="b">ボーナス</em>':'<em class="nb">通常</em>'}</span><span class="ct">×${l.n}</span><span class="ex">${fmt(l.n*l.each)}</span></li>`).join('');}
+
+  function compute(){
+    const err=validate();
+    $('#ue-lv').classList.toggle('bad',!!err&&/いまのLv|上限はLv/.test(err));
+    $('#ue-target').classList.toggle('bad',!!err&&/目標/.test(err));
+    if(err){resBody.innerHTML=`<p class="msg err">${err}</p>`;setBar('—','入力を見直してください');return;}
+    const exp=st.lv>=st.caps[st.star-1]?0:st.exp;
+    const S=Object.assign({},st,{exp,inv:capTitanium(st.inv,st.bonus,st.tcap)});
+    const planner=st.pref==='even'?solvePlanEven:solvePlan;
+    const step=buildSegments(S,'step'), first=buildSegments(S,'first');
+    const main=st.plan==='step'?step:first, alt=st.plan==='step'?first:step;
+    const needLB=main.needStar>st.star;
+    const totalNeed=main.segs.reduce((a,s)=>a+s.need,0);
+    const avail=availExp(S);
+    $('#ue-invsum').innerHTML=`この武器に入るEXPの合計: <span class="num">${fmt(avail)}</span>${st.useNB?'':'（ボーナス素材のみ）'}${st.tcap!=null?`（チタンは${fmt(st.tcap)}個まで）`:''}`;
+    if(totalNeed<=0){resBody.innerHTML='<p class="msg">もう目標Lvに届いています。</p>';setBar('0','目標Lvに到達済み');return;}
+
+    const sol=planner(main.segs,S);
+    if(!sol){
+      const short=totalNeed-avail;
+      const est=reachEstimate(main.segs,avail);
+      const why=short>0
+        ?`あと <b class="num">${fmt(short)}</b> EXP 足りません（ボーナスのチタンで約${Math.ceil(short/1500)}個分）。`
+        :'合計EXPは足りていますが、上限ごとに消える端数のぶん足りなくなります。「先に限界解放」なら足りるかもしれません。';
+      resBody.innerHTML=`<div class="sum"><div class="big"><span class="k">結果</span><span class="v" style="font-size:clamp(30px,8vw,40px)">素材不足</span><span class="pill loss"><span>届かない</span></span></div>
+        <p class="msg err">${why}</p>
+        <dl class="meta"><div><dt>必要EXP</dt><dd>${fmt(totalNeed)}</dd></div><div><dt>手持ちで入るEXP</dt><dd>${fmt(avail)}</dd></div><div><dt>全部使うと（目安）</dt><dd>★${est.star} Lv${est.lv}</dd></div><div><dt>足りないEXP</dt><dd>${short>0?fmt(short):'0'}</dd></div></dl></div>`;
+      setBar('不足',short>0?`あと ${fmt(short)} EXP 足りない`:'上限の端数で足りない');
+      return;
+    }
+
+    let lost=0,carry=0,inSum=0,lvAfter=st.target;
+    const per=main.segs.map((sg,i)=>{const r=sol.res[i];const sp=splitOver(sg,r.over);lost+=sp.lost;carry+=sp.carry;inSum+=r.sum;if(i===main.segs.length-1)lvAfter=sp.lvAfter;return sp;});
+    const over=lost+carry;
+    const pill=over===0?'<span class="pill ok"><span>ぴったり</span></span>':(lost===0?'<span class="pill carry"><span>持ち越しのみ</span></span>':'<span class="pill loss"><span>消えるEXPあり</span></span>');
+    let breakdown='';
+    if(over>0)breakdown=`<p class="hint" style="margin:0">うち上限で消える <b class="num t-loss">${fmt(lost)}</b> ／ 次のLvへ持ち越し <b class="num t-carry">${fmt(carry)}</b>${lvAfter>st.target?`（実際はLv${lvAfter}まで上がります）`:''}</p>`;
+
+    let cmp='';
+    if(needLB){
+      const altSol=planner(alt.segs,S);
+      const altName=st.plan==='step'?`先に★${main.needStar}まで限界解放してから上げる`:'上限ごとに上げてから限界解放する';
+      if(altSol){
+        let aLost=0;alt.segs.forEach((sg,i)=>{aLost+=splitOver(sg,altSol.res[i].over).lost;});
+        const d=altSol.over-over;
+        cmp=`<p class="compare">${altName}場合は端数 <b>+${fmt(altSol.over)}</b> EXP${d<0?`。<b>${fmt(-d)}</b> 少なくなります。`:d>0?`。いまの進め方のほうが <b>${fmt(d)}</b> 少ないです。`:'で、同じです。'}</p>`;
+      }else{
+        cmp=`<p class="compare">${altName}場合は、手持ちでは届きません。</p>`;
+      }
+    }
+
+    let steps='<ol class="steps">';
+    main.segs.forEach((sg,i)=>{
+      const r=sol.res[i],sp=per[i];
+      if(sg.lbBefore.length)steps+=`<li class="lb">ここで限界解放 → ★${sg.lbBefore[sg.lbBefore.length-1]}（上限Lv${sg.cap}）</li>`;
+      const tail=r.over===0?'<span class="t-ok">端数なし</span>'
+        :(sp.lost>0&&sp.carry===0?`<span class="t-loss">上限で消える <span class="num">+${fmt(sp.lost)}</span></span>`
+        :(sp.lost===0?`<span class="t-carry">次のLvへ持ち越し <span class="num">+${fmt(sp.carry)}</span></span>`
+        :`<span class="t-loss">消える <span class="num">+${fmt(sp.lost)}</span></span> <span class="t-carry">持ち越し <span class="num">+${fmt(sp.carry)}</span></span>`));
+      steps+=`<li class="segc"><div class="segh"><span class="st">★${sg.star}</span><span class="lv">Lv${sg.from}${sg.fromExp?`<small> +${fmt(sg.fromExp)}</small>`:''} → Lv${sg.to}</span>${sg.isCap?'<span class="cap">上限</span>':''}<span class="need">必要 <b>${fmt(sg.need)}</b></span></div>
+        <ul class="items">${itemsHTML(r.lines)}</ul>
+        <div class="segf"><span>入るEXP <span class="num">${fmt(r.sum)}</span></span>${tail}</div></li>`;
+    });
+    steps+='</ol>';
+
+    const tc=[0,0,0,0];sol.res.forEach(r=>r.lines.forEach(l=>{tc[l.r]+=l.n;}));
+    const TN=['錆びた','普通','クロム','チタン'];
+    const tierLine=`<p class="tiers"><span>使う個数</span>${[3,2,1,0].map(r=>`<span>${TN[r]}<b class="num">${fmt(tc[r])}</b></span>`).join('')}${st.tcap!=null?`<span>（チタンの上限 ${fmt(st.tcap)}）</span>`:''}</p>`;
+    let evenNote='';
+    if(st.pref==='even')evenNote=sol.fallback
+      ?'<p class="msg">普通・クロム・チタンを全部使っても届かないので、錆びたを端数調整より多く使っています。</p>'
+      :(main.segs.length>1?'<p class="hint" style="margin:0">均等は区間ごとにそろえているので、全体の個数は少しずれることがあります。</p>':'');
+    const nbLoss=sol.res.reduce((a,r)=>a+r.lines.filter(l=>!l.bonus).reduce((b,l)=>b+l.n*l.each*0.5,0),0);
+    const nbNote=nbLoss>0?`<p class="hint" style="margin:0">ボーナスなしの素材を使っています。その素材を対応する武器に使えば、あと ${fmt(nbLoss)} EXP 多く入ります。</p>`:'';
+
+    resBody.innerHTML=`<div class="sum">
+      <div class="big"><span class="k">端数</span><span class="v">+${fmt(over)}</span><span class="u">EXP</span>${pill}</div>
+      ${breakdown}
+      ${tierLine}${evenNote}
+      <dl class="meta"><div><dt>必要EXP</dt><dd>${fmt(totalNeed)}</dd></div><div><dt>素材で入るEXP</dt><dd>${fmt(inSum)}</dd></div><div><dt>使う素材</dt><dd>${fmt(sol.cnt)}個</dd></div><div><dt>クレジット</dt><dd>${fmt(inSum*CREDIT_PER_EXP)}</dd></div></dl>
+      ${cmp}${nbNote}<p class="hint" style="margin:0">ゲームの自動選択は、手持ちによってはボーナスなしの素材を選ぶことがあります。下の組み合わせを手動で入れるのが確実です。</p>
+    </div>${steps}`;
+    setBar(`+${fmt(over)} EXP`,over===0?`ぴったり・素材${fmt(sol.cnt)}個`:(lost>0?`うち${fmt(lost)}は上限で消える`:'次のLvへ持ち越し'));
+  }
+
+  let timer=0;
+  function update(){paint();save();clearTimeout(timer);timer=setTimeout(compute,80);}
+
+  /* ---------- events ---------- */
+  chips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;st.weapon=b.dataset.v;const w=WEAPONS.find(x=>x[0]===st.weapon);st.bonus=[0,1,2,3].map(t=>t===PIN||t===w[2]);update();});
+  starSeg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.star=+b.dataset.v;update();});
+  $('#ue-planSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.plan=b.dataset.v;update();});
+  $('#ue-prefSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.pref=b.dataset.v;update();});
+  $('#ue-useNB').addEventListener('change',e=>{st.useNB=e.target.checked;update();});
+  $('#ue-tcap').addEventListener('input',e=>{const v=e.target.value.trim();st.tcap=v===''?null:Math.max(0,int(v,0));update();});
+  $('#ue-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.target=+b.dataset.lv;update();});
+  $('#ue-lv').addEventListener('input',e=>{st.lv=int(e.target.value,0);update();});
+  $('#ue-exp').addEventListener('input',e=>{st.exp=Math.max(0,int(e.target.value,0));update();});
+  $('#ue-target').addEventListener('input',e=>{st.target=int(e.target.value,0);update();});
+  inv.addEventListener('input',e=>{const i=e.target;if(!i.matches('input'))return;st.inv[+i.dataset.t][+i.dataset.r]=Math.max(0,int(i.value,0));st.sample=false;update();});
+  inv.addEventListener('click',e=>{const b=e.target.closest('.bt');if(!b)return;const t=+b.dataset.t;st.bonus[t]=!st.bonus[t];update();});
+  inv.addEventListener('focusin',e=>{if(e.target.matches('input'))e.target.select();});
+  capsBox.addEventListener('input',e=>{const i=e.target;if(!i.matches('input'))return;st.caps[+i.dataset.s-1]=int(i.value,0);update();});
+  $('#ue-zero').addEventListener('click',()=>{st.inv=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];st.sample=false;update();});
+  $('#ue-toRes').addEventListener('click',()=>{$('#ue-result').scrollIntoView({block:'start'});});
+  document.querySelectorAll('.app-ue input.n').forEach(i=>i.addEventListener('blur',()=>paint()));
+
+  paint();compute();
+})();
+})();
+</script>
+<script>
+(function(){
+/*SOLVER-START*/
+// Lv → Lv1からの累計EXP（index = Lv）
+const TOTAL=[0,0,10,35,75,130,200,275,355,445,540,645,760,890,1035,1195,1370,1555,1755,1970,2200,2585,3010,3490,4025,4605,5240,6025,6870,7765,8690,9665,10675,11770,12935,14185,15520,16945,18490,20115,21800,23535,25335,27310,29475,31845,34430,37245,40310,43650,47295,51280,55645,60435,65700,71495,77880,84920,92685,101250,110695,121105,132570,145185,159050,174270,190955,209220,229185,250975,274720,300420,328075,357685,389250,422770,458245,495675,535060,574445,613830,653215,692600,731985,771370,814665,866930,936130,1020550,1123540,1249185];
+const MAXLV=90;
+const EXP=[50,500,2000,10000];        // 白・青・黄・紫
+const CREDIT_PER_EXP=7;
+const OVER_W=1/200;                   // 端数200EXPを、1枚ぶんの手間と同じとみなす
+const LAMBDA={fast:0,bal:10,save:60}; // 紫1枚を、ほかのレポート何枚ぶんの重さとみなすか
+
+function better(a,b){
+  if(Math.abs(a.cost-b.cost)>1e-9)return a.cost<b.cost;
+  if(a.over!==b.over)return a.over<b.over;
+  return a.taps<b.taps;
+}
+// 紫をちょうどp枚使うときの最良の組み合わせ（白・青・黄は所持数まで）
+function planForP(N,p,inv){
+  const W=inv[0],B=inv[1],Y=inv[2];
+  const R=N-EXP[3]*p;
+  let best=null;
+  const yMax=Math.min(Y,Math.max(0,Math.ceil(R/EXP[2])));
+  for(let y=0;y<=yMax;y++){
+    const R2=R-EXP[2]*y;
+    const bHi=Math.min(B,Math.max(0,Math.ceil(R2/EXP[1])));
+    const bLo=Math.max(0,Math.ceil((R2-EXP[0]*W)/EXP[1]));
+    if(bLo>bHi)continue;
+    const fl=Math.floor(R2/EXP[1]);
+    for(const b of [bLo,bHi,fl,fl+1]){
+      if(b<bLo||b>bHi)continue;
+      const w=Math.max(0,Math.ceil((R2-EXP[1]*b)/EXP[0]));
+      if(w>W)continue;
+      const total=EXP[3]*p+EXP[2]*y+EXP[1]*b+EXP[0]*w;
+      const over=total-N,taps=p+y+b+w;
+      const c={n:[w,b,y,p],total,over,taps,cost:taps+over*OVER_W};
+      if(!best||better(c,best))best=c;
+    }
+  }
+  return best;
+}
+// 紫0枚〜上限まで、それぞれの最良案（届く分だけ）
+function frontier(N,inv,pCap){
+  const pHigh=Math.min(pCap,Math.max(0,Math.ceil(N/EXP[3])));
+  const pts=[];
+  for(let p=0;p<=pHigh;p++){const r=planForP(N,p,inv);if(r)pts.push(r);}
+  return pts;
+}
+function pick(pts,lambda){
+  let best=null,bs=0;
+  for(const r of pts){
+    const s=r.cost+lambda*r.n[3];
+    if(!best||s<bs-1e-9||(Math.abs(s-bs)<=1e-9&&r.n[3]<best.n[3])){best=r;bs=s;}
+  }
+  return best;
+}
+// 均等：青・黄・紫の枚数をできるだけそろえる（白は端数調整の9枚まで）
+function mkPlan(n,N,fallback){
+  const total=EXP[0]*n[0]+EXP[1]*n[1]+EXP[2]*n[2]+EXP[3]*n[3];
+  const taps=n[0]+n[1]+n[2]+n[3];
+  return{n,total,over:total-N,taps,cost:taps+(total-N)*OVER_W,fallback:!!fallback};
+}
+// いちばん多い色にどれだけ足りていないか（持っていない分は数えない）
+function deficit(n,caps){
+  const mx=Math.max(n[1],n[2],n[3]);let d=0;
+  for(let i=1;i<=3;i++)d+=Math.min(caps[i],mx)-n[i];
+  return d;
+}
+function evenPlan(N,inv,pCap){
+  if(N<=0)return null;
+  const W=inv[0],B=inv[1],Y=inv[2],P=Math.min(inv[3],pCap);
+  const caps=[W,B,Y,P];
+  const wmax=Math.min(W,9);
+  const reach=M=>EXP[3]*Math.min(P,M)+EXP[2]*Math.min(Y,M)+EXP[1]*Math.min(B,M)+EXP[0]*wmax;
+  const Mhi=Math.max(P,Y,B);
+  if(reach(Mhi)<N){
+    // 青・黄・紫を全部使っても届かない：残りを白で埋める
+    const rest=N-(EXP[3]*P+EXP[2]*Y+EXP[1]*B);
+    const w=Math.max(0,Math.ceil(rest/EXP[0]));
+    if(w>W)return null;
+    return mkPlan([w,B,Y,P],N,true);
+  }
+  let lo=0,hi=Mhi;
+  while(lo<hi){const mid=(lo+hi)>>1;if(reach(mid)>=N)hi=mid;else lo=mid+1;}
+  const M=lo,pm=Math.min(P,M),ym=Math.min(Y,M),bm=Math.min(B,M);
+  let best=null,bk=null;
+  for(let p=pm;p>=0;p--){
+    if(EXP[3]*p+EXP[2]*ym+EXP[1]*bm+EXP[0]*wmax<N)break;
+    for(let y=ym;y>=0;y--){
+      const R=N-EXP[3]*p-EXP[2]*y;
+      if(R>EXP[1]*bm+EXP[0]*wmax)break;
+      const b0=Math.max(0,Math.ceil((R-EXP[0]*wmax)/EXP[1]));
+      for(const b of [b0,b0+1]){
+        if(b>bm)continue;
+        const rem=R-EXP[1]*b;
+        const w=rem>0?Math.ceil(rem/EXP[0]):0;
+        if(w>wmax)continue;
+        const c=mkPlan([w,b,y,p],N,false);
+        const k=[c.over,deficit(c.n,caps),w,p];
+        if(!best||lexLess(k,bk)){best=c;bk=k;}
+      }
+    }
+  }
+  return best;
+}
+function lexLess(a,b){for(let i=0;i<a.length;i++){if(a[i]<b[i])return true;if(a[i]>b[i])return false;}return false;}
+function levelAt(totalExp,cap){let L=1;while(L<cap&&TOTAL[L+1]<=totalExp)L++;return L;}
+/*SOLVER-END*/
+
+(function(){
+  const $=s=>document.querySelector(s);
+  const fmt=n=>Math.round(n).toLocaleString('ja-JP');
+  const KEY='report-calc-v1';
+  const R=[{k:'w',c:'白',n:'初級'},{k:'b',c:'青',n:'中級'},{k:'y',c:'黄',n:'上級'},{k:'p',c:'紫',n:'最上級'}];
+  const MODES={fast:'時短',bal:'バランス',save:'紫温存',even:'均等'};
+  const MODE_SUB={fast:'枚数を最少に',bal:'黄で代われる分は紫を使わない',save:'青を使ってでも紫を減らす',even:'青・黄・紫を同じくらいに'};
+  const DEFAULT={lv:80,exp:0,target:90,teacher:90,inv:[1500,700,200,60],pcap:null,mode:'bal',manualP:null,sample:true};
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  const int=(v,d)=>{const n=parseInt(v,10);return Number.isFinite(n)?n:d;};
+
+  function sanitize(o){
+    const d=clone(DEFAULT);if(!o||typeof o!=='object')return d;
+    for(const k of['lv','exp','target','teacher'])if(o[k]!=null)d[k]=int(o[k],d[k]);
+    if(Array.isArray(o.inv)&&o.inv.length===4)d.inv=o.inv.map(v=>Math.max(0,int(v,0)));
+    d.pcap=o.pcap==null?null:Math.max(0,int(o.pcap,0));
+    if(MODES[o.mode])d.mode=o.mode;
+    d.sample=!!o.sample;
+    return d;
+  }
+  function load(){try{const raw=localStorage.getItem(KEY);if(raw)return sanitize(JSON.parse(raw));}catch(e){}return clone(DEFAULT);}
+  function save(){try{const s=clone(st);s.manualP=null;localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  let st=load();
+
+  /* ---------- static UI ---------- */
+  const inv=$('#rp-inv');
+  inv.innerHTML=R.map((r,i)=>`<div class="ir"><label class="nm" for="rp-inv-${i}"><span class="sw ${r.k}"></span><span><b>${r.n}レポート（${r.c}）</b><small>${fmt(EXP[i])} EXP</small></span></label><input class="n" type="number" inputmode="numeric" min="0" step="1" id="rp-inv-${i}" data-i="${i}"></div>`).join('');
+  (function(){let h='';for(let L=1;L<=MAXLV;L++)h+=`<tr><td class="r">${L}</td><td class="r">${L<MAXLV?fmt(TOTAL[L+1]-TOTAL[L]):'—'}</td><td class="r">${fmt(TOTAL[L])}</td></tr>`;$('#rp-expTable tbody').innerHTML=h;})();
+
+  function setVal(sel,v){const el=typeof sel==='string'?$(sel):sel;if(document.activeElement!==el)el.value=v==null?'':v;}
+  function paint(){
+    setVal('#rp-lv',st.lv);setVal('#rp-exp',st.exp);setVal('#rp-target',st.target);setVal('#rp-teacher',st.teacher);
+    const nxt=st.lv>=1&&st.lv<MAXLV?TOTAL[st.lv+1]-TOTAL[st.lv]:0;
+    $('#rp-expHint').textContent=nxt?`次のLvまで ${fmt(nxt)}（0〜${fmt(nxt-1)}）`:'';
+    const qs=[60,70,80,85,90].filter(v=>v<=Math.min(st.teacher,MAXLV));
+    $('#rp-quick').innerHTML=qs.map(v=>`<button type="button" data-lv="${v}" aria-pressed="${st.target===v}">Lv${v}</button>`).join('');
+    inv.querySelectorAll('input').forEach(i=>setVal(i,st.inv[+i.dataset.i]));
+    setVal('#rp-pcap',st.pcap);
+    $('#rp-sample').hidden=!st.sample;
+    $('#rp-modeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st.mode)));
+  }
+
+  function validate(){
+    if(!(st.teacher>=1&&st.teacher<=MAXLV))return`先生Lvは1〜${MAXLV}で入れてください。`;
+    if(!(st.lv>=1&&st.lv<=MAXLV))return`いまのLvは1〜${MAXLV}で入れてください。`;
+    if(st.lv>st.teacher)return'いまのLvが先生Lvを超えています。';
+    if(!(st.target>=1))return'目標Lvを入れてください。';
+    if(st.target>st.teacher)return`生徒Lvは先生Lv（${st.teacher}）より上げられません。`;
+    if(st.target<=st.lv)return'目標Lvは、いまのLvより大きくしてください。';
+    const nxt=TOTAL[st.lv+1]-TOTAL[st.lv];
+    if(st.exp<0||st.exp>=nxt)return`たまっているEXPは0〜${fmt(nxt-1)}で入れてください。`;
+    return null;
+  }
+
+  /* ---------- chart ---------- */
+  const svg=$('#rp-chart'),tip=$('#rp-tip'),wrap=$('#rp-chartwrap');
+  let chartData=null;
+  function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;}
+  function drawChart(){
+    if(!chartData)return;
+    const {pts,sel,rec}=chartData;
+    const W=Math.max(260,wrap.clientWidth||600),H=220,m={l:46,r:16,t:26,b:30};
+    const pw=W-m.l-m.r,ph=H-m.t-m.b;
+    const x0=pts[0].n[3],x1=pts[pts.length-1].n[3];
+    const yRaw=Math.max(...pts.map(r=>r.taps));
+    const ys=niceStep(Math.max(1,yRaw)/4),yMax=Math.ceil(yRaw/ys)*ys||ys;
+    const sx=v=>x1===x0?m.l+pw/2:m.l+(v-x0)/(x1-x0)*pw;
+    const sy=v=>m.t+(1-v/yMax)*ph;
+    let g='';
+    for(let v=0;v<=yMax+1e-9;v+=ys){const y=sy(v);g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l-8}" y="${y+4}" text-anchor="end">${fmt(v)}</text>`;}
+    const xs=Math.max(1,niceStep(Math.max(1,(x1-x0))/Math.max(2,Math.floor(pw/70))));
+    for(let v=Math.ceil(x0/xs)*xs;v<=x1;v+=xs){g+=`<text x="${sx(v)}" y="${H-10}" text-anchor="middle">${v}</text>`;}
+    g+=`<text x="${m.l-8}" y="${m.t-12}" text-anchor="end">合計</text>`;
+    const path=pts.map((r,i)=>`${i?'L':'M'}${sx(r.n[3]).toFixed(1)},${sy(r.taps).toFixed(1)}`).join('');
+    const area=path+`L${sx(x1).toFixed(1)},${sy(0)}L${sx(x0).toFixed(1)},${sy(0)}Z`;
+    g+=`<path d="${area}" fill="var(--accent)" fill-opacity=".10" stroke="none"/>`;
+    g+=`<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${sy(0)}" y2="${sy(0)}" stroke="var(--line)" stroke-width="1"/>`;
+    const rp=pts.find(r=>r.n[3]===rec),sp=pts.find(r=>r.n[3]===sel);
+    const anchor=x=>x<m.l+40?'start':x>W-m.r-40?'end':'middle';
+    if(rp&&rec!==sel){const x=sx(rec),y=sy(rp.taps);g+=`<circle cx="${x}" cy="${y}" r="6" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/><text class="ann" x="${x}" y="${Math.max(12,y-12)}" text-anchor="${anchor(x)}">おすすめ</text>`;}
+    if(sp){const x=sx(sel),y=sy(sp.taps);g+=`<circle cx="${x}" cy="${y}" r="7" fill="var(--rp)" stroke="var(--surface)" stroke-width="2"/><text class="ann" x="${x}" y="${Math.max(12,y-13)}" text-anchor="${anchor(x)}">${rec===sel?'おすすめ・':''}紫${sel}枚・計${fmt(sp.taps)}枚</text>`;}
+    g+=`<line id="rp-xh" x1="0" x2="0" y1="${m.t}" y2="${sy(0)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/><circle id="rp-xd" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`;
+    g+=`<rect id="rp-hit" x="${m.l-8}" y="0" width="${pw+16}" height="${H}" fill="transparent" style="cursor:pointer"/>`;
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('width',W);svg.setAttribute('height',H);
+    svg.innerHTML=g;
+    chartData.geo={sx,sy,x0,x1,m,pw,W};
+  }
+  function nearest(clientX){
+    const {pts,geo}=chartData;const rect=svg.getBoundingClientRect();
+    const x=(clientX-rect.left)*(geo.W/rect.width);
+    let best=pts[0],bd=Infinity;for(const r of pts){const d=Math.abs(geo.sx(r.n[3])-x);if(d<bd){bd=d;best=r;}}
+    return best;
+  }
+  function showTip(r){
+    const {geo}=chartData;const x=geo.sx(r.n[3]),y=geo.sy(r.taps);
+    const xh=svg.querySelector('#rp-xh'),xd=svg.querySelector('#rp-xd');
+    xh.setAttribute('x1',x);xh.setAttribute('x2',x);xh.setAttribute('visibility','visible');
+    xd.setAttribute('cx',x);xd.setAttribute('cy',y);xd.setAttribute('visibility','visible');
+    const [w,b,yy,p]=r.n;
+    tip.innerHTML=`紫 <b>${p}</b>枚 → 合計 <b>${fmt(r.taps)}</b>枚<div class="mix"><span>黄${fmt(yy)}</span><span>青${fmt(b)}</span><span>白${fmt(w)}</span><span>端数+${fmt(r.over)}</span></div>`;
+    tip.hidden=false;
+    const rect=svg.getBoundingClientRect(),scale=rect.width/geo.W;
+    const tw=tip.offsetWidth,cw=wrap.clientWidth;
+    let left=x*scale-tw/2;left=Math.max(0,Math.min(cw-tw,left));
+    let top=y*scale-tip.offsetHeight-14;if(top<0)top=y*scale+14;
+    tip.style.left=left+'px';tip.style.top=top+'px';
+  }
+  function hideTip(){tip.hidden=true;const xh=svg.querySelector('#rp-xh'),xd=svg.querySelector('#rp-xd');if(xh)xh.setAttribute('visibility','hidden');if(xd)xd.setAttribute('visibility','hidden');}
+  svg.addEventListener('pointermove',e=>{if(chartData&&chartData.pts.length>1)showTip(nearest(e.clientX));});
+  svg.addEventListener('pointerleave',hideTip);
+  svg.addEventListener('click',e=>{if(!chartData||chartData.pts.length<2)return;const r=nearest(e.clientX);st.manualP=r.n[3];compute();showTip(chartData.pts.find(q=>q.n[3]===r.n[3]));});
+  if(window.ResizeObserver)new ResizeObserver(()=>drawChart()).observe(wrap);
+
+  /* ---------- compute & render ---------- */
+  const resBody=$('#rp-resBody');
+  function setBar(mix,s){$('#rp-barMix').innerHTML=mix;$('#rp-barS').textContent=s;}
+
+  function compute(){
+    const err=validate();
+    $('#rp-lv').classList.toggle('bad',!!err&&/いまのLv/.test(err));
+    $('#rp-target').classList.toggle('bad',!!err&&/目標|より上げられません/.test(err));
+    $('#rp-teacher').classList.toggle('bad',!!err&&/先生Lvは/.test(err));
+    $('#rp-exp').classList.toggle('bad',!!err&&/たまっている/.test(err));
+    if(err){resBody.innerHTML=`<p class="msg err">${err}</p>`;$('#rp-tradeoff').hidden=true;$('#rp-needLine').textContent='';setBar('—','入力を見直してください');return;}
+
+    const S=TOTAL[st.lv]+st.exp, N=TOTAL[st.target]-S;
+    $('#rp-needLine').innerHTML=`Lv${st.lv} → Lv${st.target} に必要なEXP: <b class="num">${fmt(N)}</b>（紫なら${(N/10000).toFixed(1)}枚ぶん）`;
+    const pCap=Math.min(st.inv[3],st.pcap==null?Infinity:st.pcap);
+    const pts=frontier(N,st.inv,pCap);
+    const planOf=k=>k==='even'?evenPlan(N,st.inv,pCap):pick(pts,LAMBDA[k]);
+    const rec=planOf(st.mode);
+
+    if(!rec){
+      $('#rp-tradeoff').hidden=true;
+      const allCap=EXP[0]*st.inv[0]+EXP[1]*st.inv[1]+EXP[2]*st.inv[2]+EXP[3]*Math.min(pCap,st.inv[3]);
+      const allFull=allCap+EXP[3]*(st.inv[3]-Math.min(pCap,st.inv[3]));
+      let body='';
+      if(allFull>=N&&pCap<st.inv[3]){
+        let need=pCap;while(need<=st.inv[3]&&!planForP(N,need,st.inv))need++;
+        body=`<p class="msg err">紫の上限が${pCap}枚だと届きません。上限を <b class="num">${need}</b> 枚以上にすると届きます。</p>`;
+        setBar('—',`紫の上限を${need}枚以上に`);
+      }else{
+        const short=N-allFull, reach=levelAt(S+allFull,st.teacher);
+        body=`<p class="msg err">手持ちのレポートを全部使っても、あと <b class="num">${fmt(short)}</b> EXP（紫${Math.ceil(short/10000)}枚ぶん）足りません。全部使うと Lv${reach} まで上がります。</p>`;
+        setBar('—',`あと ${fmt(short)} EXP 足りない`);
+      }
+      resBody.innerHTML=body;
+      return;
+    }
+
+    let selP=st.manualP;
+    if(selP!=null&&!pts.some(r=>r.n[3]===selP))selP=null;
+    const manual=selP!=null&&selP!==rec.n[3];
+    const plan=selP==null?rec:pts.find(r=>r.n[3]===selP);
+    const [w,b,y,p]=plan.n;
+
+    const after=S+plan.total;
+    const lost=Math.max(0,after-TOTAL[st.teacher]);
+    const carry=plan.over-lost;
+    const reach=levelAt(after,st.teacher);
+    let overNote;
+    if(plan.over===0)overNote='<span class="t-ok">ぴったり</span>';
+    else if(lost>0&&carry===0)overNote=`<span class="t-loss">上限で消える</span>`;
+    else if(lost===0)overNote=`<span class="t-carry">次のLvへ持ち越し${reach>st.target?`（Lv${reach}まで上がる）`:''}</span>`;
+    else overNote=`<span class="t-loss">消える${fmt(lost)}</span>・<span class="t-carry">持ち越し${fmt(carry)}</span>`;
+
+    const tiles=[3,2,1,0].map(i=>{const c=plan.n[i];return`<div class="ut ${R[i].k==='p'?'p':''} ${c?'':'zero'}"><span class="h"><span class="sw ${R[i].k}"></span>${R[i].c}・${R[i].n}</span><span class="c">${fmt(c)}<small> 枚</small></span><span class="l">残り ${fmt(st.inv[i]-c)}</span></div>`;}).join('');
+    let evenNote='';
+    if(st.mode==='even'&&!manual){
+      evenNote=plan.fallback
+        ?'<p class="msg">青・黄・紫を全部使っても届かないので、白を端数調整より多く使っています。</p>'
+        :'<p class="hint" style="margin:0">青・黄・紫の枚数をできるだけそろえて、白は端数調整（9枚まで）にだけ使っています。持っていない色や上限に届いた色があるときは、残りの色で同じくらいずつ補います。</p>';
+    }
+    const pShare=plan.total?Math.round(p*EXP[3]/plan.total*100):0;
+
+    const rows=['fast','bal','save','even'].map(k=>({k,r:planOf(k)})).filter(x=>x.r);
+    const cmp=rows.map(({k,r})=>`<tr class="${!manual&&k===st.mode?'on':''}"><td><button type="button" data-mode="${k}">${MODES[k]}<small>${MODE_SUB[k]}</small></button></td><td><button type="button" data-mode="${k}" tabindex="-1">${fmt(r.n[3])}</button></td><td><button type="button" data-mode="${k}" tabindex="-1">${fmt(r.taps)}</button></td><td><button type="button" data-mode="${k}" tabindex="-1">+${fmt(r.over)}</button></td></tr>`).join('');
+
+    resBody.innerHTML=`<div style="display:grid;gap:14px">
+      <div class="big"><span class="k">使う枚数</span><span class="v">${fmt(plan.taps)}</span><span class="u">枚</span>${manual?`<span class="pill manual"><span>紫${p}枚で指定</span></span>`:`<span class="pill mode"><span>${MODES[st.mode]}</span></span>`}</div>
+      <div class="use">${tiles}</div>${evenNote}
+      <dl class="meta">
+        <div><dt>必要EXP</dt><dd>${fmt(N)}</dd></div>
+        <div><dt>端数</dt><dd>+${fmt(plan.over)} <small>${overNote}</small></dd></div>
+        <div><dt>紫で入れる割合</dt><dd>${pShare}%</dd></div>
+        <div><dt>クレジット</dt><dd>${fmt(plan.total*CREDIT_PER_EXP)}</dd></div>
+      </dl>
+      <div style="display:grid;gap:6px">
+        <p class="sub">方針ごとの比較 <span class="en">Compare</span></p>
+        <table class="cmp"><thead><tr><th>方針</th><th>紫</th><th>合計枚数</th><th>端数</th></tr></thead><tbody>${cmp}</tbody></table>
+      </div>
+    </div>`;
+
+    // trade-off
+    const showChart=pts.length>1&&st.mode!=='even';
+    $('#rp-tradeoff').hidden=!showChart;
+    if(showChart){
+      const sl=$('#rp-pSlider');sl.min=pts[0].n[3];sl.max=pts[pts.length-1].n[3];sl.value=p;
+      $('#rp-pOut').textContent=p+'枚';
+      $('#rp-backRec').hidden=!manual;
+      chartData={pts,sel:p,rec:rec.n[3]};drawChart();
+    }
+    $('#rp-frontTable tbody').innerHTML=pts.map(r=>`<tr class="${r===plan?'on':''}"><td class="r">${r.n[3]}</td><td class="r">${fmt(r.n[2])}</td><td class="r">${fmt(r.n[1])}</td><td class="r">${fmt(r.n[0])}</td><td class="r">${fmt(r.taps)}</td><td class="r">+${fmt(r.over)}</td></tr>`).join('');
+
+    setBar([3,2,1,0].map(i=>`<span><span class="sw ${R[i].k}"></span>${fmt(plan.n[i])}</span>`).join(''),`合計${fmt(plan.taps)}枚・端数+${fmt(plan.over)}・${manual?'紫を指定':MODES[st.mode]}`);
+  }
+
+  let timer=0;
+  function update(resetManual){if(resetManual)st.manualP=null;paint();save();clearTimeout(timer);timer=setTimeout(compute,60);}
+
+  /* ---------- events ---------- */
+  $('#rp-lv').addEventListener('input',e=>{st.lv=int(e.target.value,0);update(true);});
+  $('#rp-exp').addEventListener('input',e=>{st.exp=Math.max(0,int(e.target.value,0));update(true);});
+  $('#rp-target').addEventListener('input',e=>{st.target=int(e.target.value,0);update(true);});
+  $('#rp-teacher').addEventListener('input',e=>{st.teacher=int(e.target.value,0);update(true);});
+  $('#rp-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.target=+b.dataset.lv;update(true);});
+  inv.addEventListener('input',e=>{const i=e.target;if(!i.matches('input'))return;st.inv[+i.dataset.i]=Math.max(0,int(i.value,0));st.sample=false;update(true);});
+  $('#rp-pcap').addEventListener('input',e=>{const v=e.target.value.trim();st.pcap=v===''?null:Math.max(0,int(v,0));update(true);});
+  $('#rp-zero').addEventListener('click',()=>{st.inv=[0,0,0,0];st.sample=false;update(true);});
+  $('#rp-modeSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.mode=b.dataset.v;update(true);});
+  $('#rp-resBody').addEventListener('click',e=>{const b=e.target.closest('button[data-mode]');if(!b)return;st.mode=b.dataset.mode;update(true);});
+  $('#rp-pSlider').addEventListener('input',e=>{st.manualP=+e.target.value;compute();});
+  $('#rp-backRec').addEventListener('click',()=>{st.manualP=null;compute();});
+  $('#rp-toRes').addEventListener('click',()=>$('#rp-result').scrollIntoView({block:'start'}));
+  document.querySelectorAll('.app-rp input.n').forEach(i=>{i.addEventListener('focus',()=>i.select());i.addEventListener('blur',()=>paint());});
+
+  paint();compute();
+})();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
